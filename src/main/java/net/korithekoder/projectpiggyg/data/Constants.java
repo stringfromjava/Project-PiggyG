@@ -2,6 +2,9 @@ package net.korithekoder.projectpiggyg.data;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.korithekoder.projectpiggyg.util.PathUtil;
+import net.korithekoder.projectpiggyg.util.PlatformType;
+import net.korithekoder.projectpiggyg.util.SystemUtil;
 
 import java.util.ArrayList;
 
@@ -27,6 +30,16 @@ public final class Constants {
 			add(GatewayIntent.GUILD_VOICE_STATES);
 		}
 	};
+
+	/**
+	 * The slash character for file pathways based on what OS PiggyG is running on.
+	 */
+	public static final char OS_SLASH = (SystemUtil.getPlatformType() == PlatformType.WINDOWS) ? '\\' : '/';
+
+	/**
+	 * The full directory to the project's app data folder for PiggyG.
+	 */
+	public static final String PROJECT_DIRECTORY = PathUtil.getUserHomePath() + OS_SLASH + "PiggyG";
 
 	private Constants() {}
 }
