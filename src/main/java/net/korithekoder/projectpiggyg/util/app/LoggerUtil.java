@@ -1,6 +1,8 @@
-package net.korithekoder.projectpiggyg.util;
+package net.korithekoder.projectpiggyg.util.app;
 
 import net.korithekoder.projectpiggyg.data.Constants;
+import net.korithekoder.projectpiggyg.util.data.FileUtil;
+import net.korithekoder.projectpiggyg.util.data.PathUtil;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -63,7 +65,7 @@ public final class LoggerUtil {
 		String fileLog = constructLog(info, type, includeDots, true);
 		String consoleLog = constructLog(info, type, includeDots, false);
 		if (writeToFile) {
-			FileUtil.writeToFile(logFile, fileLog + "\n");
+			FileUtil.writeToFile(logFile, fileLog + "\n", true);
 		}
 		System.out.println(consoleLog);
 	}

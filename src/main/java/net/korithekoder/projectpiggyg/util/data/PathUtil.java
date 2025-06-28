@@ -1,11 +1,13 @@
-package net.korithekoder.projectpiggyg.util;
+package net.korithekoder.projectpiggyg.util.data;
 
 import net.korithekoder.projectpiggyg.data.Constants;
+import net.korithekoder.projectpiggyg.util.app.LogType;
+import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
+import net.korithekoder.projectpiggyg.util.sys.PlatformType;
+import net.korithekoder.projectpiggyg.util.sys.SystemUtil;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 
 /**
  * Utility class for creating, managing, shortening, and manipulating file directories.
@@ -49,6 +51,59 @@ public final class PathUtil {
 	}
 
 	/**
+	 * Deletes a folder and it's contents by using recursion.
+	 *
+	 * @param path The folder to delete.
+	 */
+	public static void deleteDirectory(Path path) {
+		final int maxRetries = 10;
+		final int retryDelayMs = 1000;  // 1 second
+		int attempt = 0;
+		while (true) {
+			// Attempt to delete the given directory
+			try {
+				// Delete all files/folders inside the given folder.
+				if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+					try (DirectoryStream<Path> entries = Files.newDirectoryStream(path)) {
+						for (Path entry : entries) {
+							deleteDirectory(entry);
+						}
+					}
+				}
+				// Delete the folder after everything inside of it has been deleted
+				Files.delete(path);
+				break;
+			} catch (IOException e) {
+				// Failed to delete directory, try again
+				attempt++;
+				// Give up if too many attempts were made
+				if (attempt >= maxRetries) {
+					LoggerUtil.log(
+							DataUtil.buildString(
+									"Failed to delete directory '",
+									path.toString(),
+									"'!",
+									"Error Message: ",
+									e.getMessage()
+							),
+							LogType.WARN,
+							false
+					);
+					break;
+				}
+				// Make a thread to add a small delay
+				// between attempts on deleting the given directory
+				try {
+					Thread.sleep(retryDelayMs);
+				} catch (InterruptedException ie) {
+					Thread.currentThread().interrupt();
+					break;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Gets the full pathway to the project folder for PiggyG.
 	 *
 	 * @return The directory to PiggyG's project folder.
@@ -80,10 +135,28 @@ public final class PathUtil {
 	public static String ofAppData(String... toAppend) {
 		StringBuilder toReturn = new StringBuilder(Constants.APP_DATA_DIRECTORY);
 		for (String path : toAppend) {
-			toReturn.append(Constants.OS_SLASH);
+			toReturn.append(Constants.OS_FILE_SLASH);
 			toReturn.append(path);
 		}
 		return toReturn.toString();
+	}
+
+	/**
+	 * Constructs a directory with ease using the current
+	 * OS's file slash character without having to do
+	 * {@code "folder" + Constants.OS_FILE_SLASH + "folder"} many times.
+	 *
+	 * @param folders The different folder(s) to construct together.
+	 * @return A pathway with the different folder(s) passed down with the
+	 * correct OS file slash.
+	 */
+	public static String constructPath(String... folders) {
+		StringBuilder path = new StringBuilder();
+		for (String folder : folders) {
+			path.append(folder);
+			path.append(Constants.OS_FILE_SLASH);
+		}
+		return path.toString();
 	}
 
 	private PathUtil() {

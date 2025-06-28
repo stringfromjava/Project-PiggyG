@@ -2,9 +2,9 @@ package net.korithekoder.projectpiggyg.data;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.korithekoder.projectpiggyg.util.PathUtil;
-import net.korithekoder.projectpiggyg.util.PlatformType;
-import net.korithekoder.projectpiggyg.util.SystemUtil;
+import net.korithekoder.projectpiggyg.util.data.PathUtil;
+import net.korithekoder.projectpiggyg.util.sys.PlatformType;
+import net.korithekoder.projectpiggyg.util.sys.SystemUtil;
 
 import java.util.ArrayList;
 
@@ -34,12 +34,36 @@ public final class Constants {
 	/**
 	 * The slash character for file pathways based on what OS PiggyG is running on.
 	 */
-	public static final char OS_SLASH = (SystemUtil.getPlatformType() == PlatformType.WINDOWS) ? '\\' : '/';
+	public static final char OS_FILE_SLASH = (SystemUtil.getPlatformType() == PlatformType.WINDOWS) ? '\\' : '/';
 
 	/**
 	 * The full directory to the project's app data folder for PiggyG.
 	 */
-	public static final String APP_DATA_DIRECTORY = PathUtil.getUserHomePath() + OS_SLASH + "PiggyG";
+	public static final String APP_DATA_DIRECTORY = PathUtil.getUserHomePath() + OS_FILE_SLASH + "PiggyG";
+
+	/**
+	 * The maximum amount of log files that can be stored in
+	 * the {@@code logs} folder.
+	 */
+	public static final int MAX_LOG_FILES_ALLOWED = 15;
+
+	/**
+	 * The message that gets sent to the server owner of a new
+	 * guild that PiggyG joins.
+	 */
+	public static final String NEW_GUILD_DM_MESSAGE = """
+			## Thanks for adding me to yo' server gang.
+			
+			Before anything serious happens though, 'ima need to
+			give you the breakdown of how things run by me:
+			
+			- Everything that happens on yo' server doesn't ever
+			  slip by when I'm around. When something happens, I remember and log it.
+			  If you wanna obtain a log, then use the corresponding command
+			  to get the specific kind of log.
+			- Get stuck on something? I gotchu gang, just use `/help <command>`
+			  to get some helpful info about one of my commands.
+			""";
 
 	/**
 	 * ANSI code for resetting the color of text in the console.

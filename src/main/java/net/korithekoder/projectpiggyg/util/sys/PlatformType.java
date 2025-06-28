@@ -1,4 +1,4 @@
-package net.korithekoder.projectpiggyg.util;
+package net.korithekoder.projectpiggyg.util.sys;
 
 /**
  * The different platforms that PiggyG supports.

@@ -1,4 +1,4 @@
-package net.korithekoder.projectpiggyg.util;
+package net.korithekoder.projectpiggyg.util.app;
 
 import net.korithekoder.projectpiggyg.Initialize;
 
@@ -18,7 +18,9 @@ public final class AppUtil {
 	public static String getAppVersion() {
 		String version = Initialize.class.getPackage().getImplementationVersion();
 		if (version == null) {
-			version = "DEV"; // Fallback if not running from a packaged .jar
+			// Fallback if not running from a packaged .jar, usually this gets
+			// returned instead if PiggyG is running in an IDE
+			version = "DEV";
 		}
 		return version;
 	}

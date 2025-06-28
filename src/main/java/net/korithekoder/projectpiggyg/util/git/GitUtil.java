@@ -1,4 +1,4 @@
-package net.korithekoder.projectpiggyg.util;
+package net.korithekoder.projectpiggyg.util.git;
 
 /**
  * Utility class for obtaining info for the current Git repository.

@@ -1,6 +1,4 @@
-package net.korithekoder.projectpiggyg.util;
-
-import net.korithekoder.projectpiggyg.Initialize;
+package net.korithekoder.projectpiggyg.util.sys;
 
 /**
  * Utility class for either obtaining or handling things
