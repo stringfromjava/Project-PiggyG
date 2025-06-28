@@ -39,7 +39,69 @@ public final class Constants {
 	/**
 	 * The full directory to the project's app data folder for PiggyG.
 	 */
-	public static final String PROJECT_DIRECTORY = PathUtil.getUserHomePath() + OS_SLASH + "PiggyG";
+	public static final String APP_DATA_DIRECTORY = PathUtil.getUserHomePath() + OS_SLASH + "PiggyG";
 
-	private Constants() {}
+	/**
+	 * ANSI code for resetting the color of text in the console.
+	 */
+	public static final String CONSOLE_TEXT_RESET = "\u001B[0m";
+
+	/**
+	 * The color black for text in the console.
+	 */
+	public static final String CONSOLE_TEXT_BLACK = "\u001B[30m";
+
+	/**
+	 * The color red for text in the console.
+	 */
+	public static final String CONSOLE_TEXT_RED = "\u001B[31m";
+
+	/**
+	 * The color pink for text in the console.
+	 */
+	public static final String CONSOLE_TEXT_PINK = "\u001b[38;5;219m";
+
+	/**
+	 * The color green for text in the console.
+	 */
+	public static final String CONSOLE_TEXT_GREEN = "\u001B[32m";
+
+	/**
+	 * The color yellow for text in the console.
+	 */
+	public static final String CONSOLE_TEXT_YELLOW = "\u001B[33m";
+
+	/**
+	 * The color blue for text in the console.
+	 */
+	public static final String CONSOLE_TEXT_BLUE = "\u001B[34m";
+
+	/**
+	 * The color purple for text in the console.
+	 */
+	public static final String CONSOLE_TEXT_PURPLE = "\u001B[35m";
+
+	/**
+	 * The color cyan for text in the console.
+	 */
+	public static final String CONSOLE_TEXT_CYAN = "\u001B[36m";
+
+	/**
+	 * The color white for text in the console.
+	 */
+	public static final String CONSOLE_TEXT_WHITE = "\u001B[37m";
+
+	/**
+	 * Makes text in the console bold.
+	 */
+
+	public static final String CONSOLE_TEXT_BOLD = "\033[0;1m";
+
+	/**
+	 * Makes text in the console underlined.
+	 */
+	public static final String CONSOLE_TEXT_UNDERLINE = "\u001B[4m";
+
+	private Constants() {
+	}
 }

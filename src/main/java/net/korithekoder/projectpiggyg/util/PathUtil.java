@@ -78,7 +78,7 @@ public final class PathUtil {
 	 * @return The path with the appended strings with it.
 	 */
 	public static String ofAppData(String... toAppend) {
-		StringBuilder toReturn = new StringBuilder(Constants.PROJECT_DIRECTORY);
+		StringBuilder toReturn = new StringBuilder(Constants.APP_DATA_DIRECTORY);
 		for (String path : toAppend) {
 			toReturn.append(Constants.OS_SLASH);
 			toReturn.append(path);

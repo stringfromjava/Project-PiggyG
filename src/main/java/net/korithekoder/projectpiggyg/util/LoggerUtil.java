@@ -1,5 +1,7 @@
 package net.korithekoder.projectpiggyg.util;
 
+import net.korithekoder.projectpiggyg.data.Constants;
+
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,24 +12,17 @@ import java.time.format.DateTimeFormatter;
  */
 public final class LoggerUtil {
 
-	private static String logTimeDisplay;
-	private static String fileTimeDisplay;
-
 	private static File logFile;
 
 	/**
 	 * Configures the logging system.
 	 */
 	public static void configure() {
-		LocalDateTime now = LocalDateTime.now();
-		logTimeDisplay = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-		fileTimeDisplay = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss"));
-
-		logFile = FileUtil.createFile(fileTimeDisplay + ".txt", PathUtil.ofAppData("logs"), false);
+		logFile = FileUtil.createFile(getFormattedLogTimes()[1] + ".txt", PathUtil.ofAppData("logs"), false);
 	}
 
 	/**
-	 * Logs info into a text file that PiggyG created at startup.
+	 * Logs info into the console and a text file that PiggyG created at startup.
 	 *
 	 * @param info The info to log.
 	 */
@@ -36,7 +31,7 @@ public final class LoggerUtil {
 	}
 
 	/**
-	 * Logs info into a text file that PiggyG created at startup.
+	 * Logs info into the console and a text file that PiggyG created at startup.
 	 *
 	 * @param info The info to log.
 	 * @param type The type of log being displayed.
@@ -46,7 +41,7 @@ public final class LoggerUtil {
 	}
 
 	/**
-	 * Logs info into a text file that PiggyG created at startup.
+	 * Logs info into the console and a text file that PiggyG created at startup.
 	 *
 	 * @param info        The info to log.
 	 * @param type        The type of log being displayed.
@@ -65,20 +60,41 @@ public final class LoggerUtil {
 	 * @param writeToFile Should the new log be written to the current log file?
 	 */
 	public static void log(String info, LogType type, boolean includeDots, boolean writeToFile) {
-		String log = constructLog(info, type, includeDots);
+		String fileLog = constructLog(info, type, includeDots, true);
+		String consoleLog = constructLog(info, type, includeDots, false);
 		if (writeToFile) {
-			FileUtil.writeToFile(logFile, log + "\n");
+			FileUtil.writeToFile(logFile, fileLog + "\n");
 		}
-		System.out.println(log);
+		System.out.println(consoleLog);
 	}
 
-	private static String constructLog(String info, LogType type, boolean includeDots) {
+	private static String constructLog(String info, LogType type, boolean includeDots, boolean isFileLog) {
 		StringBuilder log = new StringBuilder();
-		log.append(logTimeDisplay + " ");
+		String[] logTimes = getFormattedLogTimes();
+		log.append(!isFileLog ? getLogColor(type) : "");
+		log.append(logTimes[0] + " ");
 		log.append("[PIGGYG] ");
 		log.append("[" + type + "] ");
 		log.append(info);
 		log.append(includeDots ? "..." : "");
+		log.append(!isFileLog ? Constants.CONSOLE_TEXT_RESET : "");
 		return log.toString();
+	}
+
+	private static String[] getFormattedLogTimes() {
+		LocalDateTime now = LocalDateTime.now();
+		String logTimeDisplay = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+		String fileTimeDisplay = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss"));
+		return new String[]{ logTimeDisplay, fileTimeDisplay };
+	}
+
+	private static String getLogColor(LogType type) {
+		String toReturn = Constants.CONSOLE_TEXT_BOLD;
+		switch (type) {
+			case INFO -> toReturn += Constants.CONSOLE_TEXT_PINK;
+			case WARN -> toReturn += Constants.CONSOLE_TEXT_YELLOW;
+			case ERROR -> toReturn += Constants.CONSOLE_TEXT_UNDERLINE + Constants.CONSOLE_TEXT_RED;
+		}
+		return toReturn;
 	}
 }

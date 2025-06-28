@@ -1,5 +1,7 @@
 package net.korithekoder.projectpiggyg.util;
 
+import net.korithekoder.projectpiggyg.Initialize;
+
 /**
  * Utility class for either obtaining or handling things
  * from/with specifically the user's computer system.
