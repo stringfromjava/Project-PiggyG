@@ -6,6 +6,9 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.korithekoder.projectpiggyg.util.discord.UserUtil;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * The iconic command for sending anonymous DMs to users with PiggyG.
+ */
 public class TrollCommandListener extends ListenerAdapter {
 
 	@Override

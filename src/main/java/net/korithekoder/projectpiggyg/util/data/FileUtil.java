@@ -5,9 +5,7 @@ import net.korithekoder.projectpiggyg.util.app.LogType;
 import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Utility class for handling files on the user's computer.
@@ -45,14 +43,14 @@ public final class FileUtil {
 		if (!newFile.exists()) {
 			try {
 				if (logInfo) {
-					LoggerUtil.log("Creating new file in '" + newPath + "'");
+					LoggerUtil.log(STR."Creating new file in '\{newPath}'");
 				}
 				newFile.createNewFile();
 			} catch (IOException e) {
 				if (logInfo) {
-					LoggerUtil.log("File '" + name + "' could not be created in '" + path + "'!", LogType.ERROR, false);
+					LoggerUtil.log(STR."File '\{name}' could not be created in '\{path}'!", LogType.ERROR, false);
 				} else {
-					throw new RuntimeException("File '" + name + "' could not be created in '" + path + "'!");
+					throw new RuntimeException(STR."File '\{name}' could not be created in '\{path}'!");
 				}
 			}
 		}
@@ -90,7 +88,7 @@ public final class FileUtil {
 
 		if (!file.exists()) {
 			LoggerUtil.log(
-					"Given file '" + file.getName() + "' doesn't exist! Creating new file",
+					STR."Given file '\{file.getName()}' doesn't exist! Creating new file",
 					LogType.WARN,
 					true,
 					false
@@ -103,11 +101,31 @@ public final class FileUtil {
 			writer.close();
 		} catch (IOException e) {
 			LoggerUtil.log(
-					"Failed to write new contents to file, got this error message: " + e.getMessage(),
+					STR."Failed to write new contents to file, got this error message: \{e.getMessage()}",
 					LogType.ERROR,
 					false
 			);
 		}
+	}
+
+	/**
+	 * Gets the contents of a file.
+	 *
+	 * @param file The file to obtain data from.
+	 * @return All data from the file as a string.
+	 */
+	public static String getFileData(File file) {
+		StringBuilder sb = new StringBuilder();
+		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line).append(System.lineSeparator());
+			}
+		} catch (IOException e) {
+			// Handle error or log
+			return "";
+		}
+		return sb.toString();
 	}
 
 	private FileUtil() {

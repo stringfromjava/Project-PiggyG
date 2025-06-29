@@ -43,7 +43,7 @@ public final class Initialize {
 			.setChunkingFilter(ChunkingFilter.ALL)
 			.build();
 
-	private static final String logSeparationLine = "--------------------------------------------------------------";
+	private static final String logSeparationLine = "-----------------------------------------------------------------";
 
 	/**
 	 * Sets up everything needed for PiggyG to function.
@@ -59,6 +59,7 @@ public final class Initialize {
 				configureUtilities();
 				logSystemInfo();
 				logVersionInfo();
+				// TODO: Implement a way to update all data to match the current version!
 				registerEventListeners();
 				uploadCommands();
 			}
@@ -95,24 +96,24 @@ public final class Initialize {
 
 		// Log current commit
 		if (repoInfo.commit() != null) {
-			LoggerUtil.log("Git Commit: " + repoInfo.commit(), LogType.INFO, false, false);
+			LoggerUtil.log(STR."Git Commit: \{repoInfo.commit()}", LogType.INFO, false, false);
 		} else {
 			LoggerUtil.log("Could not determine current Git commit.", LogType.ERROR, false, false);
 		}
 		// Log current branch
 		if (repoInfo.branch() != null) {
-			LoggerUtil.log("Git Branch: " + repoInfo.branch(), LogType.INFO, false, false);
+			LoggerUtil.log(STR."Git Branch: \{repoInfo.branch()}", LogType.INFO, false, false);
 		} else {
 			LoggerUtil.log("Could not determine current Git branch.", LogType.ERROR, false, false);
 		}
 		// Log remote URL
 		if (repoInfo.remoteUrl() != null) {
-			LoggerUtil.log("Git Remote URL: " + repoInfo.remoteUrl(), LogType.INFO, false, false);
+			LoggerUtil.log(STR."Git Remote URL: \{repoInfo.remoteUrl()}", LogType.INFO, false, false);
 		} else {
 			LoggerUtil.log("Could not determine Git remote URL.", LogType.ERROR, false, false);
 		}
 		// Log if the current repo is modified
-		LoggerUtil.log("Git Modified?: " + repoInfo.isModified(), LogType.INFO, false, false);
+		LoggerUtil.log(STR."Git Modified?: \{repoInfo.isModified()}", LogType.INFO, false, false);
 		LoggerUtil.log(logSeparationLine, LogType.INFO, false, false);
 	}
 
@@ -127,17 +128,17 @@ public final class Initialize {
 	}
 
 	private static void logSystemInfo() {
-		LoggerUtil.log("Current Platform: " + SystemUtil.getPlatformType(), LogType.INFO, false);
-		LoggerUtil.log("Current Platform Version: " + System.getProperty("os.version"), LogType.INFO, false);
-		LoggerUtil.log("App Data Directory: " + Constants.APP_DATA_DIRECTORY, LogType.INFO, false);
+		LoggerUtil.log(STR."Current Platform: \{SystemUtil.getPlatformType()}", LogType.INFO, false);
+		LoggerUtil.log(STR."Current Platform Version: \{System.getProperty("os.version")}", LogType.INFO, false);
+		LoggerUtil.log(STR."App Data Directory: \{Constants.APP_DATA_DIRECTORY}", LogType.INFO, false);
 		LoggerUtil.log(logSeparationLine, LogType.INFO, false);
 	}
 
 	private static void logVersionInfo() {
-		LoggerUtil.log("PiggyG Version: " + AppUtil.getAppVersion(), LogType.INFO, false);
-		LoggerUtil.log("JDA API Version: " + JDAInfo.VERSION, LogType.INFO, false);
-		LoggerUtil.log("Discord API Version: " + JDAInfo.DISCORD_GATEWAY_VERSION, LogType.INFO, false);
-		LoggerUtil.log("Java Version: " + System.getProperty("java.version"), LogType.INFO, false);
+		LoggerUtil.log(STR."PiggyG Version: \{AppUtil.getAppVersion()}", LogType.INFO, false);
+		LoggerUtil.log(STR."JDA API Version: \{JDAInfo.VERSION}", LogType.INFO, false);
+		LoggerUtil.log(STR."Discord API Version: \{JDAInfo.DISCORD_GATEWAY_VERSION}", LogType.INFO, false);
+		LoggerUtil.log(STR."Java Version: \{System.getProperty("java.version")}", LogType.INFO, false);
 		LoggerUtil.log(logSeparationLine, LogType.INFO, false);
 	}
 
@@ -162,7 +163,7 @@ public final class Initialize {
 							LoggerUtil.log(logSeparationLine, LogType.INFO, false);
 						},
 						error -> {
-							LoggerUtil.log("Failed to upload commands: " + error.getMessage(), LogType.ERROR, false);
+							LoggerUtil.log(STR."Failed to upload commands: \{error.getMessage()}", LogType.ERROR, false);
 							LoggerUtil.log(logSeparationLine, LogType.INFO, false);
 						}
 				);

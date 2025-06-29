@@ -37,15 +37,15 @@ public final class PathUtil {
 		try {
 			if (!Files.exists(dirPath)) {
 				if (logInfo) {
-					LoggerUtil.log("Creating new directory '" + path + "'", LogType.INFO, true);
+					LoggerUtil.log(STR."Creating new directory '\{path}'", LogType.INFO, true);
 				}
 				Files.createDirectories(dirPath);
 			}
 		} catch (IOException e) {
 			if (logInfo) {
-				LoggerUtil.log("Failed to create directory: " + path + "!", LogType.ERROR, false);
+				LoggerUtil.log(STR."Failed to create directory: \{path}!", LogType.ERROR, false);
 			} else {
-				throw new RuntimeException("Failed to create directory: " + path + "!");
+				throw new RuntimeException(STR."Failed to create directory: \{path}!");
 			}
 		}
 	}
@@ -121,7 +121,7 @@ public final class PathUtil {
 			case LINUX -> {
 				return Paths.get(userHome, ".config").toString();
 			}
-			default -> throw new RuntimeException("PiggyG doesn't support the platform \"" + platformType + "\"!");
+			default -> throw new RuntimeException(STR."PiggyG doesn't support the platform \"\{platformType}\"!");
 		}
 	}
 
