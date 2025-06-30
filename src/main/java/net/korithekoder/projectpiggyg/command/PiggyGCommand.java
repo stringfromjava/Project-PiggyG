@@ -16,6 +16,9 @@ import java.nio.file.Paths;
  * Simple class for new commands to extend to.
  * All this really does is make every command do checks when things
  * don't exist.
+ * <p>
+ * <b>!! IMPORTANT !!</b>: Make sure to call the super method(s) when extending
+ * to this class, or otherwise this class will be useless!
  */
 public class PiggyGCommand extends ListenerAdapter {
 
@@ -29,7 +32,7 @@ public class PiggyGCommand extends ListenerAdapter {
 			Path guildPath = Paths.get(PathUtil.fromGuildFolder(guild.getId()));
 			if (!guildPath.toFile().exists()) {
 				LoggerUtil.log(
-						STR."Guild folder for guild \{guild.getName()} (ID = \{guild.getId()} doesn't exist! Creating guild directory",
+						STR."Guild folder for guild '\{guild.getName()}' (ID = \{guild.getId()} doesn't exist! Creating guild directory",
 						LogType.WARN,
 						true
 				);

@@ -44,7 +44,11 @@ public final class PathUtil {
 			}
 		} catch (IOException e) {
 			if (logInfo) {
-				LoggerUtil.log(STR."Failed to create directory: \{path}!", LogType.ERROR, false);
+				LoggerUtil.log(
+						STR."Failed to create directory: \{path}, got this error message: '\{e.getMessage()}'",
+						LogType.ERROR,
+						false
+				);
 			} else {
 				throw new RuntimeException(STR."Failed to create directory: \{path}!");
 			}
@@ -114,7 +118,7 @@ public final class PathUtil {
 		StringBuilder toReturn = new StringBuilder(constructPath(Constants.APP_DATA_DIRECTORY, "guilds", guildId));
 		for (String folder : toAppend) {
 			toReturn.append(folder);
-			toReturn.append(Constants.OS_FILE_SLASH);
+			toReturn.append(Constants.OS_PATH_SEPERATOR);
 		}
 		String s = toReturn.toString();
 		return s.substring(0, s.length() - 1);
@@ -152,7 +156,7 @@ public final class PathUtil {
 	public static String ofAppData(String... toAppend) {
 		StringBuilder toReturn = new StringBuilder(Constants.APP_DATA_DIRECTORY);
 		for (String path : toAppend) {
-			toReturn.append(Constants.OS_FILE_SLASH);
+			toReturn.append(Constants.OS_PATH_SEPERATOR);
 			toReturn.append(path);
 		}
 		return toReturn.toString();
@@ -171,7 +175,7 @@ public final class PathUtil {
 		StringBuilder path = new StringBuilder();
 		for (String folder : folders) {
 			path.append(folder);
-			path.append(Constants.OS_FILE_SLASH);
+			path.append(Constants.OS_PATH_SEPERATOR);
 		}
 		return path.toString();
 	}
@@ -192,6 +196,25 @@ public final class PathUtil {
 			);
 			createPath(path);
 		}
+	}
+
+	/**
+	 * Gets the path to the file provided (without the
+	 * name of the file included).
+	 *
+	 * @param file The file object to get the path from.
+	 * @return The modified path.
+	 */
+	public static String getFilePath(File file) {
+		String path = file.getPath();
+		StringBuilder sb = new StringBuilder();
+		char ops = Constants.OS_PATH_SEPERATOR;
+		String[] brokenDownPath = path.split(STR."\{ops == '\\' ? "\\\\" : ops}");
+		for (int i = 0; i < brokenDownPath.length - 1; i++) {
+			sb.append(brokenDownPath[i]);
+			sb.append(ops);
+		}
+		return sb.toString().substring(0, sb.toString().length() - 1);
 	}
 
 	private PathUtil() {

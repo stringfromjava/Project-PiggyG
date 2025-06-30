@@ -22,11 +22,6 @@ public final class GuildUtil {
 	 * @param guild The new guild as a {@link net.dv8tion.jda.api.entities.Guild} object.
 	 */
 	public static void createNewServerFolder(Guild guild) {
-		LoggerUtil.log(
-				STR."PiggyG joined a new server. (NAME: \{guild.getName()}, ID: \{guild.getId()})",
-				LogType.INFO,
-				false
-		);
 		// Paths
 		String guildId = guild.getId();
 		String newGuildPath = PathUtil.fromGuildFolder(guildId);
@@ -53,8 +48,8 @@ public final class GuildUtil {
 	 */
 	public static String generateDefaultConfigJson() {
 		JSONObject config = new JSONObject("{}");
-		config.put("disabletrollsglobally", false);
-		config.put("blockedtrollusers", List.of());
+		config.put("disable-trolls-globally", false);
+		config.put("blocked-troll-users", List.of());
 		return config.toString(2);
 	}
 

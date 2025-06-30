@@ -7,7 +7,7 @@ public final class DataUtil {
 
 	/**
 	 * Simply builds a string together without having to
-	 * concatenate everything with the plus ({@code +}) operator.
+	 * concatenate everything with the addition ({@code +}) operator.
 	 *
 	 * @param strings All strings to be put together.
 	 * @return A newly constructed string.

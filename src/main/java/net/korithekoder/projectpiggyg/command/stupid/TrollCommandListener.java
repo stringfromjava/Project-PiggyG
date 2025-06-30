@@ -8,10 +8,15 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.korithekoder.projectpiggyg.command.PiggyGCommand;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
+import net.korithekoder.projectpiggyg.util.data.PathUtil;
 import net.korithekoder.projectpiggyg.util.discord.UserUtil;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -31,6 +36,7 @@ public class TrollCommandListener extends PiggyGCommand {
 		User user = event.getOption("user").getAsUser();
 		String message = event.getOption("message").getAsString();
 		Message.Attachment attachment = null; // Reassign later since this option isn't required
+		File attachmentAsFile = null;
 		OptionMapping attachmentOM = event.getOption("attachment");
 		FileUpload attachmentAsFileUpload;
 		Runnable onSuccess = () -> {
@@ -57,9 +63,9 @@ public class TrollCommandListener extends PiggyGCommand {
 		}
 
 		if (attachment != null) {
-			File file = FileUtil.convertAttachmentToFile(attachment, guild.getId());
-			if (file != null) {
-				attachmentAsFileUpload = FileUpload.fromData(file, attachment.getFileName());
+			attachmentAsFile = FileUtil.convertAttachmentToFile(attachment, guild.getId());
+			if (attachmentAsFile != null) {
+				attachmentAsFileUpload = FileUpload.fromData(attachmentAsFile, attachment.getFileName());
 			} else {
 				attachmentAsFileUpload = null;
 			}
@@ -67,10 +73,31 @@ public class TrollCommandListener extends PiggyGCommand {
 			attachmentAsFileUpload = null;
 		}
 
+		// Send the troll message
 		if (attachmentAsFileUpload == null) {
 			UserUtil.sendDirectMessage(user, message, List.of(), onSuccess, onFailure);
 		} else {
 			UserUtil.sendDirectMessage(user, message, List.of(attachmentAsFileUpload), onSuccess, onFailure);
 		}
+
+		// Log the info
+		LocalDateTime time = LocalDateTime.now();
+		File trollLogsFile = FileUtil.ensureFileExists(
+				PathUtil.fromGuildFolder(guild.getId(), "logs", "trolls.json"),
+				"[]"
+		);
+		JSONArray trollLogs = new JSONArray(FileUtil.getFileData(trollLogsFile));
+		JSONObject newLog = new JSONObject("{}");
+		newLog.put("sender-username", user.getName())
+				.put("sender-id", user.getId())
+				.put("time-sent", new JSONObject()
+						.put("y", time.getYear())
+						.put("h", time.getHour())
+						.put("s", time.getSecond()))
+						.put("tz", Clock.systemDefaultZone().getZone())
+				.put("attachment-name", (attachmentAsFile != null) ? attachmentAsFile.getName() : "null")
+				.put("message", message);
+		trollLogs.put(newLog);
+		FileUtil.writeToFile(trollLogsFile, trollLogs.toString(2));
 	}
 }

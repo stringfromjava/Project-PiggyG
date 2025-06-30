@@ -32,14 +32,14 @@ public final class Constants {
 	};
 
 	/**
-	 * The slash character for file pathways based on what OS PiggyG is running on.
+	 * The slash character for directories based on the OS PiggyG is running on.
 	 */
-	public static final char OS_FILE_SLASH = (SystemUtil.getPlatformType() == PlatformType.WINDOWS) ? '\\' : '/';
+	public static final char OS_PATH_SEPERATOR = (SystemUtil.getPlatformType() == PlatformType.WINDOWS) ? '\\' : '/';
 
 	/**
 	 * The full directory to the project's app data folder for PiggyG.
 	 */
-	public static final String APP_DATA_DIRECTORY = PathUtil.getUserHomePath() + OS_FILE_SLASH + "PiggyG";
+	public static final String APP_DATA_DIRECTORY = STR."\{PathUtil.getUserHomePath()}\{OS_PATH_SEPERATOR}PiggyG";
 
 	/**
 	 * The maximum amount of log files that can be stored in

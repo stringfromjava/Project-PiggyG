@@ -20,7 +20,7 @@ public final class LoggerUtil {
 	 * Configures the logging system.
 	 */
 	public static void configure() {
-		logFile = FileUtil.createFile(getFormattedLogTimes()[1] + ".txt", PathUtil.ofAppData("logs"), false);
+		logFile = FileUtil.createFile(STR."\{getFormattedLogTimes()[1]}.txt", PathUtil.ofAppData("logs"), false);
 	}
 
 	/**
@@ -74,9 +74,9 @@ public final class LoggerUtil {
 		StringBuilder log = new StringBuilder();
 		String[] logTimes = getFormattedLogTimes();
 		log.append(!isFileLog ? getLogColor(type) : "");
-		log.append(logTimes[0] + " ");
+		log.append(STR."\{logTimes[0]} ");
 		log.append("[PIGGYG] ");
-		log.append("[" + type + "] ");
+		log.append(STR."[\{type}] ");
 		log.append(info);
 		log.append(includeDots ? "..." : "");
 		log.append(!isFileLog ? Constants.CONSOLE_TEXT_RESET : "");

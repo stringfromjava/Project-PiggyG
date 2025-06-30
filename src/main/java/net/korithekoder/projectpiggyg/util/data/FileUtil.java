@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Paths;
 
 /**
  * Utility class for handling files on the user's computer.
@@ -39,7 +40,7 @@ public final class FileUtil {
 	 */
 	@NotNull
 	public static File createFile(String name, String path, boolean logInfo) {
-		String newPath = path + Constants.OS_FILE_SLASH + name;
+		String newPath = path + Constants.OS_PATH_SEPERATOR + name;
 		File newFile = new File(newPath);
 
 		// Create the new file
@@ -51,7 +52,11 @@ public final class FileUtil {
 				newFile.createNewFile();
 			} catch (IOException e) {
 				if (logInfo) {
-					LoggerUtil.log(STR."File '\{name}' could not be created in '\{path}'!", LogType.ERROR, false);
+					LoggerUtil.log(
+							STR."File '\{name}' could not be created in '\{path}', got this error message: '\{e.getMessage()}'",
+							LogType.ERROR,
+							false
+					);
 				} else {
 					throw new RuntimeException(STR."File '\{name}' could not be created in '\{path}'!");
 				}
@@ -136,6 +141,39 @@ public final class FileUtil {
 	}
 
 	/**
+	 * Ensures the existence of a file; if it does NOT exist, then
+	 * a new file (with the same name) will be created.
+	 *
+	 * @param filePath The path to the file.
+	 * @return The file instance.
+	 */
+	public static File ensureFileExists(String filePath) {
+		return ensureFileExists(filePath, "");
+	}
+
+	/**
+	 * Ensures the existence of a file; if it does NOT exist, then
+	 * a new file (with the same name) will be created.
+	 *
+	 * @param filePath The path to the file.
+	 * @param contents Data to add to the file (if it doesn't exist).
+	 * @return The file instance.
+	 */
+	public static File ensureFileExists(String filePath, String contents) {
+		File file = Paths.get(filePath).toFile();
+		if (!file.exists()) {
+			LoggerUtil.log(
+					STR."File '\{file.getName()}' in '\{filePath}' is missing!",
+					LogType.WARN,
+					false
+			);
+			createFile(file.getName(), PathUtil.getFilePath(file));
+			writeToFile(file, contents);
+		}
+		return file;
+	}
+
+	/**
 	 * Converts a {@link net.dv8tion.jda.api.entities.Message.Attachment}
 	 * to a {@link java.io.File}. Make sure to delete the file after when you're done
 	 * using it!
@@ -149,7 +187,6 @@ public final class FileUtil {
 			// Paths
 			String taPath = PathUtil.fromGuildFolder(guildId, "trollattachments");
 			String path = PathUtil.fromGuildFolder(guildId, "trollattachments", attachment.getFileName());
-			System.out.println(path);
 			// Make sure the troll attachments path exists
 			PathUtil.ensurePathExists(taPath);
 
@@ -165,7 +202,7 @@ public final class FileUtil {
 			}
 		} catch (IOException e) {
 			LoggerUtil.log(
-					"Failed to convert an attachment to a file.",
+					STR."Failed to convert an attachment to a file, got this error message: '\{e.getMessage()}'",
 					LogType.ERROR,
 					false
 			);
