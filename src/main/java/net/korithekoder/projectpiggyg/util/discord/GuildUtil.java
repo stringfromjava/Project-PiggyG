@@ -1,12 +1,10 @@
 package net.korithekoder.projectpiggyg.util.discord;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.korithekoder.projectpiggyg.data.Constants;
 import net.korithekoder.projectpiggyg.util.app.LogType;
 import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
-import org.apache.commons.collections4.bag.CollectionBag;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -30,21 +28,22 @@ public final class GuildUtil {
 				false
 		);
 		// Paths
-		String newServerPath = PathUtil.constructPath(Constants.APP_DATA_DIRECTORY, "servers", guild.getId());
-		String newLogPath = PathUtil.constructPath(Constants.APP_DATA_DIRECTORY, "servers", guild.getId(), "logs");
+		String guildId = guild.getId();
+		String newGuildPath = PathUtil.fromGuildFolder(guildId);
+		String newLogPath = PathUtil.fromGuildFolder(guildId, "logs");
+		String newUAPath = PathUtil.fromGuildFolder(guildId, "trollattachments");
 
 		// Create directories
-		PathUtil.createDirectory(newServerPath);
-		PathUtil.createDirectory(newLogPath);
+		PathUtil.createPath(newGuildPath);
+		PathUtil.createPath(newLogPath);
+		PathUtil.createPath(newUAPath);
 		// Create files
-		File configFile = FileUtil.createFile("config.json", newServerPath);
+		File configFile = FileUtil.createFile("config.json", newGuildPath);
 		File trollLogsFile = FileUtil.createFile("trolls.json", newLogPath);
 
 		// Write to files with default content
 		FileUtil.writeToFile(configFile, generateDefaultConfigJson());
 		FileUtil.writeToFile(trollLogsFile, "[]");
-
-//		System.out.println(FileUtil.getFileData(configFile));
 	}
 
 	/**

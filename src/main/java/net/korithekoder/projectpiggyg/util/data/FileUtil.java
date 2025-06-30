@@ -1,11 +1,14 @@
 package net.korithekoder.projectpiggyg.util.data;
 
+import net.dv8tion.jda.api.entities.Message;
 import net.korithekoder.projectpiggyg.data.Constants;
 import net.korithekoder.projectpiggyg.util.app.LogType;
 import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
+import java.net.URL;
 
 /**
  * Utility class for handling files on the user's computer.
@@ -111,7 +114,7 @@ public final class FileUtil {
 	/**
 	 * Gets the contents of a file.
 	 *
-	 * @param file The file to obtain data from.
+	 * @param file The file to collect data from.
 	 * @return All data from the file as a string.
 	 */
 	public static String getFileData(File file) {
@@ -122,10 +125,52 @@ public final class FileUtil {
 				sb.append(line).append(System.lineSeparator());
 			}
 		} catch (IOException e) {
-			// Handle error or log
+			LoggerUtil.log(
+					STR."Could not obtain data from file '\{file.getName()}'.",
+					LogType.ERROR,
+					false
+			);
 			return "";
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Converts a {@link net.dv8tion.jda.api.entities.Message.Attachment}
+	 * to a {@link java.io.File}. Make sure to delete the file after when you're done
+	 * using it!
+	 *
+	 * @param attachment The attachment to convert.
+	 * @return The attachment as a {@link java.io.File} object.
+	 */
+	@Nullable
+	public static File convertAttachmentToFile(Message.Attachment attachment, String guildId) {
+		try (InputStream in = new URL(attachment.getUrl()).openStream()) {
+			// Paths
+			String taPath = PathUtil.fromGuildFolder(guildId, "trollattachments");
+			String path = PathUtil.fromGuildFolder(guildId, "trollattachments", attachment.getFileName());
+			System.out.println(path);
+			// Make sure the troll attachments path exists
+			PathUtil.ensurePathExists(taPath);
+
+			File file = new File(path);
+			// Copy the data from the attachment to the file
+			try (OutputStream out = new FileOutputStream(file)) {
+				byte[] buffer = new byte[8192];
+				int len;
+				while ((len = in.read(buffer)) != -1) {
+					out.write(buffer, 0, len);
+				}
+				return file;
+			}
+		} catch (IOException e) {
+			LoggerUtil.log(
+					"Failed to convert an attachment to a file.",
+					LogType.ERROR,
+					false
+			);
+			return null;
+		}
 	}
 
 	private FileUtil() {

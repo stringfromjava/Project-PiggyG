@@ -59,7 +59,6 @@ public final class Initialize {
 				configureUtilities();
 				logSystemInfo();
 				logVersionInfo();
-				// TODO: Implement a way to update all data to match the current version!
 				registerEventListeners();
 				uploadCommands();
 			}
@@ -79,7 +78,7 @@ public final class Initialize {
 		// Sort from oldest to newest
 		Collections.reverse(logFiles);
 
-		// If the amount of log files is over the set limit, then
+		// If the number of log files is over the set limit, then
 		// delete all old ones to save memory
 		if (logFiles.size() > Constants.MAX_LOG_FILES_ALLOWED - 1) {
 			for (int i = Constants.MAX_LOG_FILES_ALLOWED - 1; i < logFiles.size(); i++) {
@@ -118,9 +117,9 @@ public final class Initialize {
 	}
 
 	private static void setupProjectFilesAndFolders() {
-		PathUtil.createDirectory(Constants.APP_DATA_DIRECTORY, false);
-		PathUtil.createDirectory(PathUtil.ofAppData("logs"), false);
-		PathUtil.createDirectory(PathUtil.ofAppData("servers"), false);
+		PathUtil.createPath(Constants.APP_DATA_DIRECTORY, false);
+		PathUtil.createPath(PathUtil.ofAppData("logs"), false);
+		PathUtil.createPath(PathUtil.ofAppData("guilds"), false);
 	}
 
 	private static void configureUtilities() {
@@ -156,6 +155,7 @@ public final class Initialize {
 						Commands.slash("troll", "Send an anonymous DM to a user on the server.")
 								.addOption(OptionType.USER, "user", "The user to troll.", true)
 								.addOption(OptionType.STRING, "message", "The message to send.", true)
+								.addOption(OptionType.ATTACHMENT, "attachment", "An optional attachment to send with your dumb message.")
 				)
 				.queue(
 						success -> {

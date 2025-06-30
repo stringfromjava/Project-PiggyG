@@ -6,6 +6,7 @@ import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
 import net.korithekoder.projectpiggyg.util.sys.PlatformType;
 import net.korithekoder.projectpiggyg.util.sys.SystemUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 
@@ -20,8 +21,8 @@ public final class PathUtil {
 	 * @param path The path of the directory to create.
 	 * @throws RuntimeException If an I/O error occurs while creating the directory.
 	 */
-	public static void createDirectory(String path) {
-		createDirectory(path, true);
+	public static void createPath(String path) {
+		createPath(path, true);
 	}
 
 	/**
@@ -32,7 +33,7 @@ public final class PathUtil {
 	 *                be written to the current log file?
 	 * @throws RuntimeException If an I/O error occurs while creating the directory.
 	 */
-	public static void createDirectory(String path, boolean logInfo) {
+	public static void createPath(String path, boolean logInfo) {
 		Path dirPath = Paths.get(path);
 		try {
 			if (!Files.exists(dirPath)) {
@@ -55,7 +56,7 @@ public final class PathUtil {
 	 *
 	 * @param path The folder to delete.
 	 */
-	public static void deleteDirectory(Path path) {
+	public static void deletePath(Path path) {
 		final int maxRetries = 10;
 		final int retryDelayMs = 1000;  // 1 second
 		int attempt = 0;
@@ -66,11 +67,11 @@ public final class PathUtil {
 				if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
 					try (DirectoryStream<Path> entries = Files.newDirectoryStream(path)) {
 						for (Path entry : entries) {
-							deleteDirectory(entry);
+							deletePath(entry);
 						}
 					}
 				}
-				// Delete the folder after everything inside of it has been deleted
+				// Delete the folder after everything inside it has been deleted
 				Files.delete(path);
 				break;
 			} catch (IOException e) {
@@ -104,6 +105,22 @@ public final class PathUtil {
 	}
 
 	/**
+	 * Gets the folder path to a specific guild.
+	 *
+	 * @param guildId The ID of the guild. This is also the name of the folder.
+	 * @return The path to the guild folder.
+	 */
+	public static String fromGuildFolder(String guildId, String... toAppend) {
+		StringBuilder toReturn = new StringBuilder(constructPath(Constants.APP_DATA_DIRECTORY, "guilds", guildId));
+		for (String folder : toAppend) {
+			toReturn.append(folder);
+			toReturn.append(Constants.OS_FILE_SLASH);
+		}
+		String s = toReturn.toString();
+		return s.substring(0, s.length() - 1);
+	}
+
+	/**
 	 * Gets the full pathway to the project folder for PiggyG.
 	 *
 	 * @return The directory to PiggyG's project folder.
@@ -129,7 +146,7 @@ public final class PathUtil {
 	 * Gets a pathway to either a file or folder from PiggyG's
 	 * folder in the user's app data directory.
 	 *
-	 * @param toAppend Strings that will be added alongside of the project's folder's path.
+	 * @param toAppend Strings that will be added alongside the project's folder's path.
 	 * @return The path with the appended strings with it.
 	 */
 	public static String ofAppData(String... toAppend) {
@@ -157,6 +174,24 @@ public final class PathUtil {
 			path.append(Constants.OS_FILE_SLASH);
 		}
 		return path.toString();
+	}
+
+	/**
+	 * Ensures a directory exists; if it doesn't, then
+	 * it automatically creates it.
+	 *
+	 * @param path The path to ensure existence of.
+	 */
+	public static void ensurePathExists(String path) {
+		File toCheck = Paths.get(path).toFile();
+		if (!toCheck.exists()) {
+			LoggerUtil.log(
+					STR."Directory '\{path}' is missing!",
+					LogType.WARN,
+					false
+			);
+			createPath(path);
+		}
 	}
 
 	private PathUtil() {

@@ -1,7 +1,7 @@
 package net.korithekoder.projectpiggyg.util.data;
 
 /**
- * Utility class for manipulating data in specifically variables.
+ * Utility class for manipulating data in (specifically) variables.
  */
 public final class DataUtil {
 
