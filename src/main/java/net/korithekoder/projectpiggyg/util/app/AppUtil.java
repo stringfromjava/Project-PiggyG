@@ -25,5 +25,6 @@ public final class AppUtil {
 		return version;
 	}
 
-	private AppUtil() {}
+	private AppUtil() {
+	}
 }

@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import net.korithekoder.projectpiggyg.command.misc.HelpCommandListener;
 import net.korithekoder.projectpiggyg.command.obtain.ObtainTrollAttachmentCommandListener;
 import net.korithekoder.projectpiggyg.command.obtain.ObtainTrollLogsCommandListener;
 import net.korithekoder.projectpiggyg.command.stupid.TrollCommandListener;
@@ -149,6 +150,7 @@ public final class Initialize {
 		// Normal events
 		client.addEventListener(new JoinLeaveGuildEventListener());
 		// Command events
+		client.addEventListener(new HelpCommandListener());
 		client.addEventListener(new TrollCommandListener());
 		client.addEventListener(new ObtainTrollLogsCommandListener());
 		client.addEventListener(new ObtainTrollAttachmentCommandListener());
@@ -157,6 +159,9 @@ public final class Initialize {
 	private static void uploadCommands() {
 		client.updateCommands()
 				.addCommands(
+						// Help command
+						Commands.slash("help", "Get more info about my commands yo.")
+								.addOption(OptionType.STRING, "command", "Specific command to get more info of."),
 						// Troll command
 						Commands.slash("troll", "Send an anonymous DM to a user on the server.")
 								.addOption(OptionType.USER, "user", "The user to troll.", true)
@@ -169,6 +174,7 @@ public final class Initialize {
 						// ObtainTrollAttachment command
 						Commands.slash("obtaintrollattachment", "Gets an attachment that was sent in a troll message.")
 								.addOption(OptionType.STRING, "attachment_name", "The file name of the attachment sent.", true)
+								.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
 				)
 				.queue(
 						success -> {

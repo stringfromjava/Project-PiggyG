@@ -21,6 +21,12 @@ import java.nio.file.Paths;
  * All this really does is make every command do checks when things
  * don't exist.
  * <p>
+ * When you make a new command, make sure to do two things:
+ * <p>
+ * 1. Add its event listener in {@link net.korithekoder.projectpiggyg.Initialize}.
+ * <p>
+ * 2. Add to the command uploads also in {@link net.korithekoder.projectpiggyg.Initialize}.
+ * <p>
  * <b>!! IMPORTANT !!</b>: Make sure to call the super method(s) when extending
  * to this class, or otherwise this class will be useless!
  */
@@ -43,7 +49,7 @@ public abstract class PiggyGCommand extends ListenerAdapter {
 					GuildUtil.createNewServerFolder(guild);
 				}
 			}
-			// Run the command
+			// Run the command :sparkles:
 			onSlashCommandUsed(event);
 		} catch (Exception e) {
 			StackTraceElement element = e.getStackTrace()[0];
