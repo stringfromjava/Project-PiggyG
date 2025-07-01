@@ -39,11 +39,11 @@ public final class Constants {
 	/**
 	 * The full directory to the project's app data folder for PiggyG.
 	 */
-	public static final String APP_DATA_DIRECTORY = STR."\{PathUtil.getUserHomePath()}\{OS_PATH_SEPERATOR}PiggyG";
+	public static final String APP_DATA_DIRECTORY = STR."\{PathUtil.getUserHomePath()}\{OS_PATH_SEPERATOR}.piggyg";
 
 	/**
-	 * The maximum amount of log files that can be stored in
-	 * the {@@code logs} folder.
+	 * The maximum number of log files that can be stored in
+	 * the {@code logs} folder.
 	 */
 	public static final int MAX_LOG_FILES_ALLOWED = 15;
 

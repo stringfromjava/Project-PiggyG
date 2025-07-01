@@ -17,7 +17,7 @@ import java.util.List;
 public final class GuildUtil {
 
 	/**
-	 * Creates a brand-new folder with many files and folders inside.
+	 * Creates a brand-new folder with many files and folders inside for a new guild.
 	 *
 	 * @param guild The new guild as a {@link net.dv8tion.jda.api.entities.Guild} object.
 	 */

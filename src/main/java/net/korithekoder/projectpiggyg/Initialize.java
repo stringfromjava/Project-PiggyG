@@ -3,13 +3,17 @@ package net.korithekoder.projectpiggyg;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.JDAInfo;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import net.korithekoder.projectpiggyg.command.obtain.ObtainTrollAttachmentCommandListener;
+import net.korithekoder.projectpiggyg.command.obtain.ObtainTrollLogsCommandListener;
 import net.korithekoder.projectpiggyg.command.stupid.TrollCommandListener;
 import net.korithekoder.projectpiggyg.data.Constants;
 import net.korithekoder.projectpiggyg.event.guild.JoinLeaveGuildEventListener;
@@ -57,6 +61,7 @@ public final class Initialize {
 				logGitInfo();
 				setupProjectFilesAndFolders();
 				configureUtilities();
+				// TODO: Setup an error handler!
 				logSystemInfo();
 				logVersionInfo();
 				registerEventListeners();
@@ -146,6 +151,8 @@ public final class Initialize {
 		client.addEventListener(new JoinLeaveGuildEventListener());
 		// Command events
 		client.addEventListener(new TrollCommandListener());
+		client.addEventListener(new ObtainTrollLogsCommandListener());
+		client.addEventListener(new ObtainTrollAttachmentCommandListener());
 	}
 
 	private static void uploadCommands() {
@@ -155,7 +162,14 @@ public final class Initialize {
 						Commands.slash("troll", "Send an anonymous DM to a user on the server.")
 								.addOption(OptionType.USER, "user", "The user to troll.", true)
 								.addOption(OptionType.STRING, "message", "The message to send.", true)
-								.addOption(OptionType.ATTACHMENT, "attachment", "An optional attachment to send with your dumb message.")
+								.addOption(OptionType.ATTACHMENT, "attachment", "An optional attachment to send with your dumb message."),
+						// ObtainTrollLogs command
+						Commands.slash("obtaintrolllogs", "Obtain all logs of the different troll messages sent.")
+								.addOption(OptionType.USER, "from_user", "An optional user to filter the logs.")
+								.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER)),
+						// ObtainTrollAttachment command
+						Commands.slash("obtaintrollattachment", "Gets an attachment that was sent in a troll message.")
+								.addOption(OptionType.STRING, "attachment_name", "The file name of the attachment sent.", true)
 				)
 				.queue(
 						success -> {

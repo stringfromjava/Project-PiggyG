@@ -52,7 +52,7 @@ public class TrollCommandListener extends PiggyGCommand {
 			return;
 		}
 
-		// Can only use this command on a server!
+		// Can only use this command on a guild!
 		if (guild == null) {
 			event.reply("Cuh' you really tryna troll yourself right now?\nStop playing yourself :sob::man_facepalming:").queue();
 			return;
@@ -88,14 +88,20 @@ public class TrollCommandListener extends PiggyGCommand {
 		);
 		JSONArray trollLogs = new JSONArray(FileUtil.getFileData(trollLogsFile));
 		JSONObject newLog = new JSONObject("{}");
-		newLog.put("sender-username", user.getName())
-				.put("sender-id", user.getId())
+		newLog.put("sender-username", event.getUser().getName())
+				.put("sender-id", event.getUser().getId())
+				.put("receiver-username", user.getName())
+				.put("receiver-id", user.getId())
 				.put("time-sent", new JSONObject()
-						.put("y", time.getYear())
-						.put("h", time.getHour())
-						.put("s", time.getSecond()))
+						.put("year", Integer.toString(time.getYear()))
+						.put("month", Integer.toString(time.getMonthValue()))
+						.put("day", Integer.toString(time.getDayOfMonth()))
+						.put("hour", Integer.toString(time.getHour()))
+						.put("minute", Integer.toString(time.getMinute()))
+						.put("second", Integer.toString(time.getSecond())))
 						.put("tz", Clock.systemDefaultZone().getZone())
 				.put("attachment-name", (attachmentAsFile != null) ? attachmentAsFile.getName() : "null")
+				.put("attachment-url", (attachment != null) ? attachment.getUrl() : "null")
 				.put("message", message);
 		trollLogs.put(newLog);
 		FileUtil.writeToFile(trollLogsFile, trollLogs.toString(2));
