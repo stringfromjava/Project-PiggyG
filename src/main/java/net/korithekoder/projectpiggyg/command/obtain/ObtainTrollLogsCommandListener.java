@@ -25,9 +25,7 @@ import java.nio.file.Files;
 public class ObtainTrollLogsCommandListener extends PiggyGCommand {
 
 	@Override
-	public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-		super.onSlashCommandInteraction(event);
-
+	protected void onSlashCommandUsed(@NotNull SlashCommandInteractionEvent event) {
 		if (!event.getName().equals("obtaintrolllogs")) {
 			return;
 		}
@@ -38,8 +36,8 @@ public class ObtainTrollLogsCommandListener extends PiggyGCommand {
 
 		if (guild == null) {
 			event.reply(DataUtil.buildString(
-				"Bro you really tryna' piss me off right now?\n",
-				"You can't use this command in DMs, dumbass :skull_crossbones:"
+					"Bro you really tryna' piss me off right now?\n",
+					"You can't use this command in DMs, dumbass :skull_crossbones:"
 			)).queue();
 			return;
 		}

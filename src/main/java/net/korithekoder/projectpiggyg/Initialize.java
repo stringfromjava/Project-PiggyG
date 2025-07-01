@@ -61,7 +61,6 @@ public final class Initialize {
 				logGitInfo();
 				setupProjectFilesAndFolders();
 				configureUtilities();
-				// TODO: Setup an error handler!
 				logSystemInfo();
 				logVersionInfo();
 				registerEventListeners();

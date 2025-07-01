@@ -25,9 +25,7 @@ import java.util.List;
 public class TrollCommandListener extends PiggyGCommand {
 
 	@Override
-	public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-		super.onSlashCommandInteraction(event);
-
+	protected void onSlashCommandUsed(@NotNull SlashCommandInteractionEvent event) {
 		if (!event.getName().equals("troll")) {
 			return;
 		}
@@ -99,7 +97,7 @@ public class TrollCommandListener extends PiggyGCommand {
 						.put("hour", Integer.toString(time.getHour()))
 						.put("minute", Integer.toString(time.getMinute()))
 						.put("second", Integer.toString(time.getSecond())))
-						.put("tz", Clock.systemDefaultZone().getZone())
+				.put("tz", Clock.systemDefaultZone().getZone())
 				.put("attachment-name", (attachmentAsFile != null) ? attachmentAsFile.getName() : "null")
 				.put("attachment-url", (attachment != null) ? attachment.getUrl() : "null")
 				.put("message", message);

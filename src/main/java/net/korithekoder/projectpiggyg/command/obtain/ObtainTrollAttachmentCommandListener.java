@@ -12,9 +12,7 @@ import java.io.File;
 public class ObtainTrollAttachmentCommandListener extends PiggyGCommand {
 
 	@Override
-	public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-		super.onSlashCommandInteraction(event);
-
+	protected void onSlashCommandUsed(@NotNull SlashCommandInteractionEvent event) {
 		if (!event.getName().equals("obtaintrollattachment")) {
 			return;
 		}

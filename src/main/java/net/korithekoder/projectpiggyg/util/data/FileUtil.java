@@ -86,7 +86,7 @@ public final class FileUtil {
 	public static void writeToFile(File file, String contents, boolean append) {
 		if (file == null) {
 			LoggerUtil.log(
-					"Tried to write to file, but it was null!",
+					"Tried to write to file, but it was null.",
 					LogType.ERROR,
 					false,
 					false

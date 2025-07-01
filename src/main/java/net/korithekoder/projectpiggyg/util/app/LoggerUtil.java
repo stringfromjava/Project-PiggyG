@@ -3,6 +3,7 @@ package net.korithekoder.projectpiggyg.util.app;
 import net.korithekoder.projectpiggyg.data.Constants;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -65,9 +66,33 @@ public final class LoggerUtil {
 		String fileLog = constructLog(info, type, includeDots, true);
 		String consoleLog = constructLog(info, type, includeDots, false);
 		if (writeToFile) {
-			FileUtil.writeToFile(logFile, fileLog + "\n", true);
+			FileUtil.writeToFile(logFile, STR."\{fileLog}\n", true);
 		}
 		System.out.println(consoleLog);
+	}
+
+	/**
+	 * Gets the formatted log times for both the file and any log added
+	 * inside the log file.
+	 *
+	 * @return A string array, with the first element being for regular logs, and
+	 * the second being for the log file's name.
+	 */
+	public static String[] getFormattedLogTimes() {
+		LocalDateTime now = LocalDateTime.now();
+		String logTimeDisplay = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+		String fileTimeDisplay = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss"));
+		return new String[]{ logTimeDisplay, fileTimeDisplay };
+	}
+
+	/**
+	 * Gets and returns a copy of the current log file.
+	 *
+	 * @return A copy of the current log file that's being used.
+	 */
+	@Nullable
+	public static File getLogFile() {
+		return logFile == null ? null : new File(logFile.getPath());
 	}
 
 	private static String constructLog(String info, LogType type, boolean includeDots, boolean isFileLog) {
@@ -81,13 +106,6 @@ public final class LoggerUtil {
 		log.append(includeDots ? "..." : "");
 		log.append(!isFileLog ? Constants.CONSOLE_TEXT_RESET : "");
 		return log.toString();
-	}
-
-	private static String[] getFormattedLogTimes() {
-		LocalDateTime now = LocalDateTime.now();
-		String logTimeDisplay = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-		String fileTimeDisplay = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss"));
-		return new String[]{ logTimeDisplay, fileTimeDisplay };
 	}
 
 	private static String getLogColor(LogType type) {
