@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.korithekoder.projectpiggyg.command.PiggyGCommand;
+import net.korithekoder.projectpiggyg.util.data.DataUtil;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
 import net.korithekoder.projectpiggyg.util.discord.UserUtil;
@@ -15,8 +16,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.time.Clock;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -24,12 +23,12 @@ import java.util.List;
  */
 public class TrollCommandListener extends PiggyGCommand {
 
+	public TrollCommandListener(String name) {
+		super(name);
+	}
+
 	@Override
 	protected void onSlashCommandUsed(@NotNull SlashCommandInteractionEvent event) {
-		if (!event.getName().equals("troll")) {
-			return;
-		}
-
 		Guild guild = event.getGuild();
 		User user = event.getOption("user").getAsUser();
 		String message = event.getOption("message").getAsString();
@@ -72,14 +71,15 @@ public class TrollCommandListener extends PiggyGCommand {
 		}
 
 		// Send the troll message
-		if (attachmentAsFileUpload == null) {
-			UserUtil.sendDirectMessage(user, message, List.of(), onSuccess, onFailure);
-		} else {
-			UserUtil.sendDirectMessage(user, message, List.of(attachmentAsFileUpload), onSuccess, onFailure);
-		}
+		UserUtil.sendDirectMessage(
+				user,
+				message,
+				(attachmentAsFileUpload != null) ? List.of(attachmentAsFileUpload) : null,
+				onSuccess,
+				onFailure
+		);
 
 		// Log the info
-		LocalDateTime time = LocalDateTime.now();
 		File trollLogsFile = FileUtil.ensureFileExists(
 				PathUtil.fromGuildFolder(guild.getId(), "logs", "trolls.json"),
 				"[]"
@@ -90,14 +90,7 @@ public class TrollCommandListener extends PiggyGCommand {
 				.put("sender-id", event.getUser().getId())
 				.put("receiver-username", user.getName())
 				.put("receiver-id", user.getId())
-				.put("time-sent", new JSONObject()
-						.put("year", Integer.toString(time.getYear()))
-						.put("month", Integer.toString(time.getMonthValue()))
-						.put("day", Integer.toString(time.getDayOfMonth()))
-						.put("hour", Integer.toString(time.getHour()))
-						.put("minute", Integer.toString(time.getMinute()))
-						.put("second", Integer.toString(time.getSecond())))
-				.put("tz", Clock.systemDefaultZone().getZone())
+				.put("time-sent", DataUtil.createCommandLogTime())
 				.put("attachment-name", (attachmentAsFile != null) ? attachmentAsFile.getName() : "null")
 				.put("attachment-url", (attachment != null) ? attachment.getUrl() : "null")
 				.put("message", message);

@@ -24,7 +24,7 @@ public class JoinLeaveGuildEventListener extends ListenerAdapter {
 	public void onGuildJoin(@NotNull GuildJoinEvent event) {
 		Guild newGuild = event.getGuild();
 		User guildOwner = newGuild.getOwner().getUser();
-		GuildUtil.createNewServerFolder(newGuild);
+		GuildUtil.createNewGuildFolder(newGuild);
 		UserUtil.sendDirectMessage(guildOwner, Constants.NEW_GUILD_DM_MESSAGE);
 		LoggerUtil.log(
 				STR."PiggyG joined a new server. (NAME: \{newGuild.getName()}, ID: \{newGuild.getId()})",

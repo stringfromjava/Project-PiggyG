@@ -1,7 +1,7 @@
 package net.korithekoder.projectpiggyg.util.git;
 
 /**
- * Utility class for obtaining info for the current Git repository.
+ * Utility class for getting info of the current Git repository.
  */
 public final class GitUtil {
 
@@ -28,7 +28,7 @@ public final class GitUtil {
 	/**
 	 * Gets basic Git info about the current app running.
 	 *
-	 * @return A {@code RepoInfo} object with basic info.
+	 * @return A {@code RepoInfo} record with basic info.
 	 */
 	public static RepoInfo getRepoInfo() {
 		String commit = runGitCommand("rev-parse", "HEAD");

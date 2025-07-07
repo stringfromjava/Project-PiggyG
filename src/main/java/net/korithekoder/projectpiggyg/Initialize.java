@@ -4,6 +4,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.ExceptionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -15,13 +17,18 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.korithekoder.projectpiggyg.command.misc.HelpCommandListener;
 import net.korithekoder.projectpiggyg.command.obtain.ObtainTrollAttachmentCommandListener;
 import net.korithekoder.projectpiggyg.command.obtain.ObtainTrollLogsCommandListener;
+import net.korithekoder.projectpiggyg.command.obtain.ObtainVoiceChannelActionLogsCommandListener;
+import net.korithekoder.projectpiggyg.command.obtain.ObtainVoiceChannelLogs;
 import net.korithekoder.projectpiggyg.command.stupid.TrollCommandListener;
 import net.korithekoder.projectpiggyg.data.Constants;
 import net.korithekoder.projectpiggyg.event.guild.JoinLeaveGuildEventListener;
+import net.korithekoder.projectpiggyg.event.guild.VoiceChannelGuildEventListener;
 import net.korithekoder.projectpiggyg.util.app.AppUtil;
 import net.korithekoder.projectpiggyg.util.app.LogType;
 import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
+import net.korithekoder.projectpiggyg.util.data.DataUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
+import net.korithekoder.projectpiggyg.util.discord.GuildUtil;
 import net.korithekoder.projectpiggyg.util.git.GitUtil;
 import net.korithekoder.projectpiggyg.util.sys.SystemUtil;
 import org.jetbrains.annotations.NotNull;
@@ -48,10 +55,13 @@ public final class Initialize {
 			.setChunkingFilter(ChunkingFilter.ALL)
 			.build();
 
-	private static final String logSeparationLine = "-----------------------------------------------------------------";
+	private static final String logSeparationLine = "=====================================================================================";
+	private static final String logSeparationSubLine = ".....................................................................................";
 
 	/**
 	 * Sets up everything needed for PiggyG to function.
+	 * <p>
+	 * <u><b><i>IMPORTANT:</i></b> This should be only called <b>ONCE</b>.</u>
 	 */
 	public static void init() {
 		client.addEventListener(new ListenerAdapter() {
@@ -66,6 +76,13 @@ public final class Initialize {
 				logVersionInfo();
 				registerEventListeners();
 				uploadCommands();
+				checkForMissingGuildFolders();
+			}
+
+			@Override
+			public void onException(@NotNull ExceptionEvent event) {
+				LoggerUtil.error(STR."Failed to initialize PiggyG, got this error: '\{event.getCause().getMessage()}'", false);
+				System.exit(0);
 			}
 		});
 	}
@@ -149,11 +166,14 @@ public final class Initialize {
 	private static void registerEventListeners() {
 		// Normal events
 		client.addEventListener(new JoinLeaveGuildEventListener());
+		client.addEventListener(new VoiceChannelGuildEventListener());
 		// Command events
-		client.addEventListener(new HelpCommandListener());
-		client.addEventListener(new TrollCommandListener());
-		client.addEventListener(new ObtainTrollLogsCommandListener());
-		client.addEventListener(new ObtainTrollAttachmentCommandListener());
+		client.addEventListener(new HelpCommandListener("help"));
+		client.addEventListener(new TrollCommandListener("troll"));
+		client.addEventListener(new ObtainTrollLogsCommandListener("obtaintrolllogs"));
+		client.addEventListener(new ObtainTrollAttachmentCommandListener("obtaintrollattachment"));
+		client.addEventListener(new ObtainVoiceChannelLogs("obtainvoicechannellogs"));
+		client.addEventListener(new ObtainVoiceChannelActionLogsCommandListener("obtainvoicechannelactionlogs"));
 	}
 
 	private static void uploadCommands() {
@@ -174,6 +194,17 @@ public final class Initialize {
 						// ObtainTrollAttachment command
 						Commands.slash("obtaintrollattachment", "Gets an attachment that was sent in a troll message.")
 								.addOption(OptionType.STRING, "attachment_name", "The file name of the attachment sent.", true)
+								.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER)),
+						// ObtainVoiceChannelLogs
+						Commands.slash("obtainvoicechannellogs", "Gets logs from people interacting with and in voice channels.")
+								.addOption(OptionType.USER, "user", "An optional user to obtain specific logs from.")
+								.addOption(OptionType.CHANNEL, "voice_channel", "An optional voice channel to obtain specific logs from.")
+								.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER)),
+						// ObtainVoiceChannelLogs
+						Commands.slash("obtainvoicechannelactionlogs", "Gets logs from users (typically admins) server muting/deafening other members in voice channels.")
+								.addOption(OptionType.USER, "affected_user", "An optional affected user that was muted/deafened to obtain specific logs from.")
+								.addOption(OptionType.USER, "from_user", "An optional inflicting user that muted/deafened another user to obtain specific logs from.")
+								.addOption(OptionType.CHANNEL, "voice_channel", "An optional voice channel to obtain specific logs from.")
 								.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
 				)
 				.queue(
@@ -186,6 +217,34 @@ public final class Initialize {
 							LoggerUtil.log(logSeparationLine, LogType.INFO, false);
 						}
 				);
+	}
+
+	public static void checkForMissingGuildFolders() {
+		int missingGuildFoldersFound = 0;
+		for (Guild guild : client.getGuilds()) {
+			String guildFolder = PathUtil.fromGuildFolder(guild.getId());
+			if (!PathUtil.doesPathExist(guildFolder)) {
+				LoggerUtil.log(
+						STR."Folder for guild '\{guild.getName()} (ID = \{guild.getId()}) is missing! Creating new guild folder",
+						LogType.WARN,
+						true
+				);
+				GuildUtil.createNewGuildFolder(guild);
+				LoggerUtil.log(logSeparationSubLine, LogType.INFO, false);
+				missingGuildFoldersFound++;
+			}
+		}
+
+		if (missingGuildFoldersFound == 0) {
+			LoggerUtil.log(STR."No missing guild folders were detected!", LogType.INFO, false);
+		} else {
+			LoggerUtil.log(DataUtil.buildString(
+					"Created missing folders for ",
+					STR."\{missingGuildFoldersFound} guild",
+					STR."\{(missingGuildFoldersFound != 1) ? "s" : ""}."
+			), LogType.INFO, false);
+		}
+		LoggerUtil.log(logSeparationLine, LogType.INFO, false);
 	}
 
 	private Initialize() {

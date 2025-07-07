@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.FileUpload;
+import net.korithekoder.projectpiggyg.data.Constants;
 import net.korithekoder.projectpiggyg.util.app.LogType;
 import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
 import net.korithekoder.projectpiggyg.util.data.DataUtil;
@@ -13,8 +14,12 @@ import net.korithekoder.projectpiggyg.util.discord.GuildUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Simple class for new commands to extend to.
@@ -32,10 +37,79 @@ import java.nio.file.Paths;
  */
 public abstract class PiggyGCommand extends ListenerAdapter {
 
+	private final String name;
+	private final boolean isGuildCommand;
+
+	/**
+	 * @param name The name of {@code this} command.
+	 */
+	public PiggyGCommand(String name) {
+		this(name, true);
+	}
+
+	/**
+	 * @param name           The name of {@code this} command.
+	 * @param isGuildCommand Can this command only be used on a guild?
+	 */
+	public PiggyGCommand(String name, boolean isGuildCommand) {
+		this.name = name;
+		this.isGuildCommand = isGuildCommand;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public boolean getIsGuildCommand() {
+		return isGuildCommand;
+	}
+
 	@Override
 	public final void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+		// If the triggered command's name doesn't
+		// equal this command's name, then ignore this method
+		if (!name.equals(event.getName())) {
+			return;
+		}
+
+		// Get the dumbass reaction image to send
+		// if the command being used is in DMs and
+		// is a guild-only command
+		Guild guild = event.getGuild();
+		InputStream input = getClass()
+				.getClassLoader()
+				.getResourceAsStream(STR."reactions\{Constants.OS_PATH_SEPERATOR}non-guild-command.jpg");
+		File tempFile = null;
 		try {
-			Guild guild = event.getGuild();
+			tempFile = File.createTempFile("non-guild-command", ".jpg");
+			if (input != null) {
+				Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			} else {
+				LoggerUtil.log(
+						STR."Could not get reaction image for a non-guild command, did you delete it?",
+						LogType.ERROR,
+						false
+				);
+			}
+		} catch (IOException e) {
+			LoggerUtil.log(
+					STR."Could not get reaction image for a non-guild command, got this error: '\{e.getMessage()}'",
+					LogType.ERROR,
+					false
+			);
+		}
+
+		if (guild == null && isGuildCommand) {
+			if (tempFile != null) {
+				event.reply("Pigga you can't use this command in our fucking DMs...")
+						.addFiles(FileUpload.fromData(tempFile)).queue();
+			} else {
+				event.reply("Pigga you can't use this command in our fucking DMs...").queue();
+			}
+			return;
+		}
+
+		try {
 			// Check if the guild's folder exists
 			// (if the command was run on one)
 			if (guild != null) {
@@ -46,10 +120,11 @@ public abstract class PiggyGCommand extends ListenerAdapter {
 							LogType.WARN,
 							true
 					);
-					GuildUtil.createNewServerFolder(guild);
+					GuildUtil.createNewGuildFolder(guild);
 				}
 			}
-			// Run the command :sparkles:
+
+			// Run the command :sparkles: (fucking finally lol)
 			onSlashCommandUsed(event);
 		} catch (Exception e) {
 			StackTraceElement element = e.getStackTrace()[0];
@@ -63,8 +138,8 @@ public abstract class PiggyGCommand extends ListenerAdapter {
 			// Error message for the log file and the reply
 			String errorMsg = DataUtil.buildString(
 					"# Sorry gang, but one of my command's event listeners (unfortunately) had an error. :sob:\n",
-					STR."\t__Please report this error (and the log file) to my official repository__.\n",
-					STR."\t**[OFFICIAL GITHUB REPO]:** https://github.com/korithekoder/Project-PiggyG\n",
+					"\t__Please report this error (and the log file) to my official repository__.\n",
+					"\t**[OFFICIAL GITHUB REPO]:** https://github.com/korithekoder/Project-PiggyG\n",
 					STR."\t**[COMMAND CLASS NAME]:** *\{element.getClassName()}*\n",
 					STR."\t**[LINE]:** *\{element.getLineNumber()}*\n",
 					STR."\t**[MESSAGE]:** *\{e.getMessage()}*"

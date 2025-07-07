@@ -2,6 +2,9 @@ package net.korithekoder.projectpiggyg.util.data;
 
 import org.json.JSONObject;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+
 /**
  * Utility class for manipulating data in (specifically) variables.
  */
@@ -44,6 +47,25 @@ public final class DataUtil {
 			}
 		}
 		return defaultValue;
+	}
+
+	/**
+	 * Generates a new {@link org.json.JSONObject} of multiple
+	 * keys with info of what time it currently is. (Meant specifically
+	 * for new logs that are made for commands.)
+	 *
+	 * @return A new {@link org.json.JSONObject} with the current time.
+	 */
+	public static JSONObject createCommandLogTime() {
+		LocalDateTime time = LocalDateTime.now();
+		return new JSONObject()
+				.put("year", Integer.toString(time.getYear()))
+				.put("month", Integer.toString(time.getMonthValue()))
+				.put("day", Integer.toString(time.getDayOfMonth()))
+				.put("hour", Integer.toString(time.getHour()))
+				.put("minute", Integer.toString(time.getMinute()))
+				.put("second", Integer.toString(time.getSecond()))
+				.put("tz", Clock.systemDefaultZone().getZone());  // tz = time zone
 	}
 
 	private DataUtil() {

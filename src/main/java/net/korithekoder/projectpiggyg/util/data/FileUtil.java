@@ -39,7 +39,7 @@ public final class FileUtil {
 	 * @return The new file instance.
 	 */
 	@NotNull
-	public static File createFile(String name, String path, boolean logInfo) {
+	public static File createFile(@NotNull String name, @NotNull String path, boolean logInfo) {
 		String newPath = path + Constants.OS_PATH_SEPERATOR + name;
 		File newFile = new File(newPath);
 
@@ -47,7 +47,7 @@ public final class FileUtil {
 		if (!newFile.exists()) {
 			try {
 				if (logInfo) {
-					LoggerUtil.log(STR."Creating new file in '\{newPath}'");
+					LoggerUtil.log(STR."Creating new file in '\{newPath}'.");
 				}
 				newFile.createNewFile();
 			} catch (IOException e) {
@@ -167,7 +167,7 @@ public final class FileUtil {
 					LogType.WARN,
 					false
 			);
-			createFile(file.getName(), PathUtil.getFilePath(file));
+			createFile(file.getName(), PathUtil.ensurePathExists(PathUtil.getFilePath(file)));
 			writeToFile(file, contents);
 		}
 		return file;

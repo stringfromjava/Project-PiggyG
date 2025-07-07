@@ -9,21 +9,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
+/**
+ * Command for getting a specific attachment that was sent in a troll message.
+ */
 public class ObtainTrollAttachmentCommandListener extends PiggyGCommand {
+
+	public ObtainTrollAttachmentCommandListener(String name) {
+		super(name);
+	}
 
 	@Override
 	protected void onSlashCommandUsed(@NotNull SlashCommandInteractionEvent event) {
-		if (!event.getName().equals("obtaintrollattachment")) {
-			return;
-		}
-
 		Guild guild = event.getGuild();
 		String attachmentName = event.getOption("attachment_name").getAsString();
-
-		if (guild == null) {
-			event.reply("Pigga you can't fucking use this command in DMs :sob:").queue();
-			return;
-		}
 
 		File trollAttachment = new File(PathUtil.fromGuildFolder(guild.getId(), "trollattachments", attachmentName));
 

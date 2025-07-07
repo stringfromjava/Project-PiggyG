@@ -55,6 +55,25 @@ public final class LoggerUtil {
 	}
 
 	/**
+	 * Logs a typical error message.
+	 *
+	 * @param info The error message to log.
+	 */
+	public static void error(String info) {
+		log(info, LogType.ERROR, false, true);
+	}
+
+	/**
+	 * Logs a typical error message.
+	 *
+	 * @param info        The error message to log.
+	 * @param writeToFile Should this log be written to the current log file?
+	 */
+	public static void error(String info, boolean writeToFile) {
+		log(info, LogType.ERROR, false, writeToFile);
+	}
+
+	/**
 	 * Logs info into the console and a text file that PiggyG created at startup.
 	 *
 	 * @param info        The info to log.

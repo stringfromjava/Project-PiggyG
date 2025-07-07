@@ -18,15 +18,18 @@ public class HelpCommandListener extends PiggyGCommand {
 
 	private final Map<String, String> commandDescriptions = new HashMap<>();
 
+	public HelpCommandListener(String name) {
+		super(name);
+	}
+
 	@Override
 	protected void onSlashCommandUsed(@NotNull SlashCommandInteractionEvent event) {
-		if (!event.getName().equals("help")) {
-			return;
-		}
-
 		String command;
 		OptionMapping commandOM = event.getOption("command");
 		List<Command> commands = event.getJDA().retrieveCommands().complete();
+
+		// Set up the more descriptive pieces of
+		// info for each command
 		assignDescriptions();
 
 		if (commandOM != null) {
@@ -49,6 +52,7 @@ public class HelpCommandListener extends PiggyGCommand {
 			}
 			event.reply(toSend.toString()).queue();
 		} else {
+			// Get the wanted command with more descriptive info
 			commands.stream()
 					.filter(cmd -> cmd.getName().equals(command))
 					.findFirst()
@@ -65,10 +69,11 @@ public class HelpCommandListener extends PiggyGCommand {
 						event.reply(toSend.toString()).queue();
 						commandFound.set(true);
 					});
-			// Reply saying the command wasn't found if it doesn't exist
+			// Stop the command if it was found and sent
 			if (commandFound.get()) {
 				return;
 			}
+			// Reply saying the command wasn't found if it doesn't exist
 			event.reply("Sorry fam', but the command given wasn't found :pensive:").queue();
 		}
 	}
@@ -76,13 +81,17 @@ public class HelpCommandListener extends PiggyGCommand {
 	private void assignDescriptions() {
 		// For any new commands, put a help (*better) description here!
 		commandDescriptions
-				.put("troll", STR."""
+				.put("help", """
+						...
+						""");
+		commandDescriptions
+				.put("troll", """
 						Allows you to send an anonymous DM with PiggyG to anyone
 						on the server that either hasn't blocked trolls (or hasn't blocked
 						PiggyG entirely :broken_heart:).
 						""");
 		commandDescriptions
-				.put("obtaintrollattachment", STR."""
+				.put("obtaintrollattachment", """
 						Permits you to get a specific attachment that was sent on
 						a specific troll message. Only users with the "Manage server"
 						permission can use this command.
@@ -91,12 +100,25 @@ public class HelpCommandListener extends PiggyGCommand {
 						find a troll log to get a valid name of a file!__
 						""");
 		commandDescriptions
-				.put("obtaintrolllogs", STR."""
+				.put("obtaintrolllogs", """
 						Sends a `.txt` file with every troll command sent.
 						This includes helpful info such as what time it was sent,
 						what time zone it was sent from, the sender's/receiver's username
 						and ID, and much more. Only users with the "Manage server"
 						permission can use this command.
+						""");
+		commandDescriptions
+				.put("obtainvoicechannellogs", """
+						Gets all logs of people joining and leaving voice channels.
+						You can also optionally put in a user an a channel to
+						filter the logs as well. Only users with the "Manage server"
+						permission can use this command.
+						""");
+		commandDescriptions
+				.put("obtainvoicechannelactionlogs", """
+						Gets all logs of users (usually admins) server muting/deafening other users.
+						Pretty helpful for catching admins abusing their power! Only users with the
+						"Manage server" permission can use this command.
 						""");
 	}
 }

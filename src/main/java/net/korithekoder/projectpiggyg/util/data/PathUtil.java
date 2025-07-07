@@ -5,6 +5,7 @@ import net.korithekoder.projectpiggyg.util.app.LogType;
 import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
 import net.korithekoder.projectpiggyg.util.sys.PlatformType;
 import net.korithekoder.projectpiggyg.util.sys.SystemUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,17 +39,13 @@ public final class PathUtil {
 		try {
 			if (!Files.exists(dirPath)) {
 				if (logInfo) {
-					LoggerUtil.log(STR."Creating new directory '\{path}'", LogType.INFO, true);
+					LoggerUtil.log(STR."Creating new directory '\{path}'");
 				}
 				Files.createDirectories(dirPath);
 			}
 		} catch (IOException e) {
 			if (logInfo) {
-				LoggerUtil.log(
-						STR."Failed to create directory: \{path}, got this error message: '\{e.getMessage()}'",
-						LogType.ERROR,
-						false
-				);
+				LoggerUtil.error(STR."Failed to create directory: \{path}, got this error message: '\{e.getMessage()}'");
 			} else {
 				throw new RuntimeException(STR."Failed to create directory: \{path}!");
 			}
@@ -67,7 +64,7 @@ public final class PathUtil {
 		while (true) {
 			// Attempt to delete the given directory
 			try {
-				// Delete all files/folders inside the given folder.
+				// Delete all files/folders inside the given folder
 				if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
 					try (DirectoryStream<Path> entries = Files.newDirectoryStream(path)) {
 						for (Path entry : entries) {
@@ -109,15 +106,15 @@ public final class PathUtil {
 	}
 
 	/**
-	 * Gets the folder path to a specific guild.
+	 * Gets the file or folder path of a specific guild.
 	 *
 	 * @param guildId The ID of the guild. This is also the name of the folder.
 	 * @return The path to the guild folder.
 	 */
 	public static String fromGuildFolder(String guildId, String... toAppend) {
 		StringBuilder toReturn = new StringBuilder(constructPath(Constants.APP_DATA_DIRECTORY, "guilds", guildId));
-		for (String folder : toAppend) {
-			toReturn.append(folder);
+		for (String path : toAppend) {
+			toReturn.append(path);
 			toReturn.append(Constants.OS_PATH_SEPERATOR);
 		}
 		String s = toReturn.toString();
@@ -185,10 +182,10 @@ public final class PathUtil {
 	 * it automatically creates it.
 	 *
 	 * @param path The path to ensure existence of.
+	 * @return The path checked (if it needs to be used).
 	 */
-	public static void ensurePathExists(String path) {
-		File toCheck = Paths.get(path).toFile();
-		if (!toCheck.exists()) {
+	public static String ensurePathExists(String path) {
+		if (!doesPathExist(path)) {
 			LoggerUtil.log(
 					STR."Directory '\{path}' is missing!",
 					LogType.WARN,
@@ -196,6 +193,20 @@ public final class PathUtil {
 			);
 			createPath(path);
 		}
+		return path;
+	}
+
+	/**
+	 * Checks if a directory exists. If the path passed down
+	 * is a file path and not a folder, then {@code false} is
+	 * passed down instead.
+	 *
+	 * @param path The path to check.
+	 * @return If the path exists.
+	 */
+	public static boolean doesPathExist(@NotNull String path) {
+		Path p = Path.of(path);
+		return (Files.exists(p) && Files.isDirectory(p));
 	}
 
 	/**
