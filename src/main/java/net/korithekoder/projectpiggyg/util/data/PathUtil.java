@@ -108,11 +108,35 @@ public final class PathUtil {
 	/**
 	 * Gets the file or folder path of a specific guild.
 	 *
-	 * @param guildId The ID of the guild. This is also the name of the folder.
+	 * @param guildId  The ID of the guild. This is also the name of the folder.
+	 * @param toAppend Any other folder to add on to the path.
 	 * @return The path to the guild folder.
 	 */
 	public static String fromGuildFolder(String guildId, String... toAppend) {
 		StringBuilder toReturn = new StringBuilder(constructPath(Constants.APP_DATA_DIRECTORY, "guilds", guildId));
+		for (String path : toAppend) {
+			toReturn.append(path);
+			toReturn.append(Constants.OS_PATH_SEPERATOR);
+		}
+		String s = toReturn.toString();
+		return s.substring(0, s.length() - 1);
+	}
+
+	/**
+	 * Gets a path to a folder or file inside the {@code blobcache} folder.
+	 *
+	 * @param guildId  The ID of the guild.
+	 * @param toAppend Any other folder to add on to the path.
+	 * @return The path to the {@code blobcache} folder (with the extra folders for
+	 * the path provided).
+	 */
+	public static String fromBlobCache(String guildId, String... toAppend) {
+		StringBuilder toReturn = new StringBuilder(constructPath(
+				Constants.APP_DATA_DIRECTORY,
+				"guilds",
+				guildId,
+				"blobcache"
+		));
 		for (String path : toAppend) {
 			toReturn.append(path);
 			toReturn.append(Constants.OS_PATH_SEPERATOR);
@@ -185,12 +209,26 @@ public final class PathUtil {
 	 * @return The path checked (if it needs to be used).
 	 */
 	public static String ensurePathExists(String path) {
+		return ensurePathExists(path, true);
+	}
+
+	/**
+	 * Ensures a directory exists; if it doesn't, then
+	 * it automatically creates it.
+	 *
+	 * @param path                  The path to ensure existence of.
+	 * @param logNonExistentWarning Should PiggyG log a warning when the path doesn't exist?
+	 * @return The path checked (if it needs to be used).
+	 */
+	public static String ensurePathExists(String path, boolean logNonExistentWarning) {
 		if (!doesPathExist(path)) {
-			LoggerUtil.log(
-					STR."Directory '\{path}' is missing!",
-					LogType.WARN,
-					false
-			);
+			if (logNonExistentWarning) {
+				LoggerUtil.log(
+						STR."Directory '\{path}' is missing!",
+						LogType.WARN,
+						false
+				);
+			}
 			createPath(path);
 		}
 		return path;

@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.korithekoder.projectpiggyg.command.PiggyGCommand;
+import net.korithekoder.projectpiggyg.command.Command;
 import net.korithekoder.projectpiggyg.util.data.DataUtil;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * The iconic command for sending anonymous DMs to users with PiggyG.
  */
-public class TrollCommandListener extends PiggyGCommand {
+public class TrollCommandListener extends Command {
 
 	public TrollCommandListener(String name) {
 		super(name);
@@ -30,7 +30,7 @@ public class TrollCommandListener extends PiggyGCommand {
 	@Override
 	protected void onSlashCommandUsed(@NotNull SlashCommandInteractionEvent event) {
 		Guild guild = event.getGuild();
-		User user = event.getOption("user").getAsUser();
+		User receiver = event.getOption("user").getAsUser();
 		String message = event.getOption("message").getAsString();
 		Message.Attachment attachment = null; // Reassign later since this option isn't required
 		File attachmentAsFile = null;
@@ -44,7 +44,7 @@ public class TrollCommandListener extends PiggyGCommand {
 		};
 
 		// Prevent the user from sending a troll to a bot
-		if (user.isBot()) {
+		if (receiver.isBot()) {
 			event.reply("Pigga you can't send trolls to bots dumbass :unamused:").setEphemeral(true).queue();
 			return;
 		}
@@ -60,7 +60,8 @@ public class TrollCommandListener extends PiggyGCommand {
 		}
 
 		if (attachment != null) {
-			attachmentAsFile = FileUtil.convertAttachmentToFile(attachment, guild.getId());
+			String taPath = PathUtil.fromGuildFolder(guild.getId(), "trollattachments");
+			attachmentAsFile = FileUtil.convertAttachmentToFile(attachment, taPath);
 			if (attachmentAsFile != null) {
 				attachmentAsFileUpload = FileUpload.fromData(attachmentAsFile, attachment.getFileName());
 			} else {
@@ -72,7 +73,7 @@ public class TrollCommandListener extends PiggyGCommand {
 
 		// Send the troll message
 		UserUtil.sendDirectMessage(
-				user,
+				receiver,
 				message,
 				(attachmentAsFileUpload != null) ? List.of(attachmentAsFileUpload) : null,
 				onSuccess,
@@ -81,18 +82,17 @@ public class TrollCommandListener extends PiggyGCommand {
 
 		// Log the info
 		File trollLogsFile = FileUtil.ensureFileExists(
-				PathUtil.fromGuildFolder(guild.getId(), "logs", "trolls.json"),
+				PathUtil.fromGuildFolder(guild.getId(), "logs", "troll.json"),
 				"[]"
 		);
 		JSONArray trollLogs = new JSONArray(FileUtil.getFileData(trollLogsFile));
-		JSONObject newLog = new JSONObject("{}");
-		newLog.put("sender-username", event.getUser().getName())
-				.put("sender-id", event.getUser().getId())
-				.put("receiver-username", user.getName())
-				.put("receiver-id", user.getId())
-				.put("time-sent", DataUtil.createCommandLogTime())
-				.put("attachment-name", (attachmentAsFile != null) ? attachmentAsFile.getName() : "null")
-				.put("attachment-url", (attachment != null) ? attachment.getUrl() : "null")
+		JSONObject newLog = new JSONObject();
+		newLog.put("author", DataUtil.createUserInfoJson(event.getUser()))
+				.put("receiver", DataUtil.createUserInfoJson(receiver))
+				.put("time", DataUtil.getCurrentTimeJson())
+				.put("attachment", new JSONObject()
+						.put("name", (attachmentAsFile != null) ? attachmentAsFile.getName() : "null")
+						.put("url", (attachment != null) ? attachment.getUrl() : "null"))
 				.put("message", message);
 		trollLogs.put(newLog);
 		FileUtil.writeToFile(trollLogsFile, trollLogs.toString(2));

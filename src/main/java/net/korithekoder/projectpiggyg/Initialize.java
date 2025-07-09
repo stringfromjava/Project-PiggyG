@@ -5,6 +5,9 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.ExceptionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -22,16 +25,20 @@ import net.korithekoder.projectpiggyg.command.obtain.ObtainVoiceChannelLogs;
 import net.korithekoder.projectpiggyg.command.stupid.TrollCommandListener;
 import net.korithekoder.projectpiggyg.data.Constants;
 import net.korithekoder.projectpiggyg.event.guild.JoinLeaveGuildEventListener;
+import net.korithekoder.projectpiggyg.event.guild.MessageGuildEventListener;
 import net.korithekoder.projectpiggyg.event.guild.VoiceChannelGuildEventListener;
 import net.korithekoder.projectpiggyg.util.app.AppUtil;
 import net.korithekoder.projectpiggyg.util.app.LogType;
 import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
 import net.korithekoder.projectpiggyg.util.data.DataUtil;
+import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
 import net.korithekoder.projectpiggyg.util.discord.GuildUtil;
 import net.korithekoder.projectpiggyg.util.git.GitUtil;
 import net.korithekoder.projectpiggyg.util.sys.SystemUtil;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -47,7 +54,7 @@ import java.util.List;
  */
 public final class Initialize {
 
-	// Use "event.getJda()" when you need to access the JDA instance in your event listeners
+	// Use "event.getJDA()" when you need to access the JDA instance in your event listeners
 	private static final JDA client = JDABuilder.createLight(Constants.PIGGYG_TOKEN, Constants.ALLOWED_GATEWAY_INTENTS)
 			.enableCache(CacheFlag.VOICE_STATE)
 			.setEventPassthrough(true)
@@ -55,8 +62,8 @@ public final class Initialize {
 			.setChunkingFilter(ChunkingFilter.ALL)
 			.build();
 
-	private static final String logSeparationLine = "=====================================================================================";
-	private static final String logSeparationSubLine = ".....................................................................................";
+	private static final String logSeparationLine = "==========================================================================================";
+	private static final String logSeparationSubLine = "..........................................................................................";
 
 	/**
 	 * Sets up everything needed for PiggyG to function.
@@ -67,16 +74,22 @@ public final class Initialize {
 		client.addEventListener(new ListenerAdapter() {
 			@Override
 			public void onReady(@NotNull ReadyEvent event) {
+				LoggerUtil.log("### PIGGYG 2.0 ###", LogType.INFO, false, false, false);
+				LoggerUtil.log("Initializing setup process", LogType.INFO, true, false, false);
+				displaySeparator(false, false);
+				//
 				// Insert code to load PiggyG here!
-				removeOldLogFiles();
-				logGitInfo();
+				// ==========================================
 				setupProjectFilesAndFolders();
 				configureUtilities();
+				logGitInfo();
 				logSystemInfo();
 				logVersionInfo();
+				removeOldLogFiles();
 				registerEventListeners();
-				uploadCommands();
 				checkForMissingGuildFolders();
+				cacheGuildMessages();
+				uploadCommands(); // This part of the setup should ALWAYS be the last!!
 			}
 
 			@Override
@@ -87,6 +100,57 @@ public final class Initialize {
 		});
 	}
 
+	private static void setupProjectFilesAndFolders() {
+		PathUtil.createPath(PathUtil.ofAppData(), false);
+		PathUtil.createPath(PathUtil.ofAppData("logs"), false);
+		PathUtil.createPath(PathUtil.ofAppData("guilds"), false);
+	}
+
+	private static void configureUtilities() {
+		LoggerUtil.configure();
+		AppUtil.configure();
+	}
+
+	private static void logGitInfo() {
+		GitUtil.RepoInfo repoInfo = GitUtil.getRepoInfo();
+		// Log current commit
+		if (repoInfo.commit() != null) {
+			LoggerUtil.log(STR."Git Commit: \{repoInfo.commit()}", LogType.INFO, false);
+		} else {
+			LoggerUtil.log("Could not determine current Git commit.", LogType.ERROR, false);
+		}
+		// Log current branch
+		if (repoInfo.branch() != null) {
+			LoggerUtil.log(STR."Git Branch: \{repoInfo.branch()}", LogType.INFO, false);
+		} else {
+			LoggerUtil.log("Could not determine current Git branch.", LogType.ERROR, false);
+		}
+		// Log remote URL
+		if (repoInfo.remoteUrl() != null) {
+			LoggerUtil.log(STR."Git Remote URL: \{repoInfo.remoteUrl()}", LogType.INFO, false);
+		} else {
+			LoggerUtil.log("Could not determine Git remote URL.", LogType.ERROR, false);
+		}
+		// Log if the current repo is modified
+		LoggerUtil.log(STR."Git Modified?: \{repoInfo.isModified()}", LogType.INFO, false);
+		displaySeparator();
+	}
+
+	private static void logSystemInfo() {
+		LoggerUtil.log(STR."Current Platform: \{SystemUtil.getPlatformType()}", LogType.INFO, false);
+		LoggerUtil.log(STR."Current Platform Version: \{System.getProperty("os.version")}", LogType.INFO, false);
+		LoggerUtil.log(STR."App Data Directory: \{Constants.APP_DATA_DIRECTORY}", LogType.INFO, false);
+		displaySeparator();
+	}
+
+	private static void logVersionInfo() {
+		LoggerUtil.log(STR."PiggyG Version: \{AppUtil.getAppVersion()}", LogType.INFO, false);
+		LoggerUtil.log(STR."JDA API Version: \{JDAInfo.VERSION}", LogType.INFO, false);
+		LoggerUtil.log(STR."Discord API Version: \{JDAInfo.DISCORD_GATEWAY_VERSION}", LogType.INFO, false);
+		LoggerUtil.log(STR."Java Version: \{System.getProperty("java.version")}", LogType.INFO, false);
+		displaySeparator();
+	}
+
 	private static void removeOldLogFiles() {
 		File logsFolder = Paths.get(PathUtil.ofAppData("logs")).toFile();
 		// If the logs folder doesn't exist, then
@@ -94,6 +158,7 @@ public final class Initialize {
 		if (!logsFolder.isDirectory()) {
 			return;
 		}
+
 		// Get all log files
 		List<File> logFiles = new ArrayList<>(Arrays.stream(logsFolder.listFiles()).sorted().toList());
 
@@ -102,70 +167,23 @@ public final class Initialize {
 
 		// If the number of log files is over the set limit, then
 		// delete all old ones to save memory
+		int staleFilesFound = 0;
 		if (logFiles.size() > Constants.MAX_LOG_FILES_ALLOWED - 1) {
 			for (int i = Constants.MAX_LOG_FILES_ALLOWED - 1; i < logFiles.size(); i++) {
-				File f = logFiles.get(i);
-				f.delete();
+				boolean deleted = FileUtil.deleteFile(logFiles.get(i).getPath());
+				if (deleted) {
+					staleFilesFound++;
+				}
 			}
 		}
-	}
-
-	private static void logGitInfo() {
-		GitUtil.RepoInfo repoInfo = GitUtil.getRepoInfo();
-		LoggerUtil.log("### PIGGYG 2.0 ###", LogType.INFO, false, false);
-		LoggerUtil.log("Setting up build", LogType.INFO, true, false);
-
-		// Log current commit
-		if (repoInfo.commit() != null) {
-			LoggerUtil.log(STR."Git Commit: \{repoInfo.commit()}", LogType.INFO, false, false);
-		} else {
-			LoggerUtil.log("Could not determine current Git commit.", LogType.ERROR, false, false);
-		}
-		// Log current branch
-		if (repoInfo.branch() != null) {
-			LoggerUtil.log(STR."Git Branch: \{repoInfo.branch()}", LogType.INFO, false, false);
-		} else {
-			LoggerUtil.log("Could not determine current Git branch.", LogType.ERROR, false, false);
-		}
-		// Log remote URL
-		if (repoInfo.remoteUrl() != null) {
-			LoggerUtil.log(STR."Git Remote URL: \{repoInfo.remoteUrl()}", LogType.INFO, false, false);
-		} else {
-			LoggerUtil.log("Could not determine Git remote URL.", LogType.ERROR, false, false);
-		}
-		// Log if the current repo is modified
-		LoggerUtil.log(STR."Git Modified?: \{repoInfo.isModified()}", LogType.INFO, false, false);
-		LoggerUtil.log(logSeparationLine, LogType.INFO, false, false);
-	}
-
-	private static void setupProjectFilesAndFolders() {
-		PathUtil.createPath(Constants.APP_DATA_DIRECTORY, false);
-		PathUtil.createPath(PathUtil.ofAppData("logs"), false);
-		PathUtil.createPath(PathUtil.ofAppData("guilds"), false);
-	}
-
-	private static void configureUtilities() {
-		LoggerUtil.configure();
-	}
-
-	private static void logSystemInfo() {
-		LoggerUtil.log(STR."Current Platform: \{SystemUtil.getPlatformType()}", LogType.INFO, false);
-		LoggerUtil.log(STR."Current Platform Version: \{System.getProperty("os.version")}", LogType.INFO, false);
-		LoggerUtil.log(STR."App Data Directory: \{Constants.APP_DATA_DIRECTORY}", LogType.INFO, false);
-		LoggerUtil.log(logSeparationLine, LogType.INFO, false);
-	}
-
-	private static void logVersionInfo() {
-		LoggerUtil.log(STR."PiggyG Version: \{AppUtil.getAppVersion()}", LogType.INFO, false);
-		LoggerUtil.log(STR."JDA API Version: \{JDAInfo.VERSION}", LogType.INFO, false);
-		LoggerUtil.log(STR."Discord API Version: \{JDAInfo.DISCORD_GATEWAY_VERSION}", LogType.INFO, false);
-		LoggerUtil.log(STR."Java Version: \{System.getProperty("java.version")}", LogType.INFO, false);
-		LoggerUtil.log(logSeparationLine, LogType.INFO, false);
+		LoggerUtil.log(STR."Deleted \{staleFilesFound} stale log file\{staleFilesFound != 1 ? "s" : ""}.", LogType.INFO, false, true);
+		displaySeparator();
 	}
 
 	private static void registerEventListeners() {
-		// Normal events
+		// Guild events
 		client.addEventListener(new JoinLeaveGuildEventListener());
+		client.addEventListener(new MessageGuildEventListener());
 		client.addEventListener(new VoiceChannelGuildEventListener());
 		// Command events
 		client.addEventListener(new HelpCommandListener("help"));
@@ -176,17 +194,102 @@ public final class Initialize {
 		client.addEventListener(new ObtainVoiceChannelActionLogsCommandListener("obtainvoicechannelactionlogs"));
 	}
 
+	public static void checkForMissingGuildFolders() {
+		int missingGuildFoldersFound = 0;
+		for (Guild guild : client.getGuilds()) {
+			String guildFolder = PathUtil.fromGuildFolder(guild.getId());
+			if (!PathUtil.doesPathExist(guildFolder)) {
+				LoggerUtil.log(
+						STR."Folder for guild '\{guild.getName()} (ID = \{guild.getId()}) is missing!",
+						LogType.WARN,
+						false
+				);
+				GuildUtil.createNewGuildFolder(guild);
+				displaySeparator(true);
+				missingGuildFoldersFound++;
+			}
+		}
+
+		if (missingGuildFoldersFound == 0) {
+			LoggerUtil.log(STR."No missing guild folders were detected!", LogType.INFO, false);
+		} else {
+			LoggerUtil.log(DataUtil.buildString(
+					"Created missing folders for ",
+					STR."\{missingGuildFoldersFound} guild",
+					STR."\{(missingGuildFoldersFound != 1) ? "s" : ""}."
+			), LogType.INFO, false, true);
+		}
+
+		displaySeparator();
+	}
+
+	private static void cacheGuildMessages() {
+		if (!AppUtil.isConditionalEnabled("DELETED_MESSAGE_LOGGING_ALLOWED")) {
+			LoggerUtil.log(STR."Conditional 'DELETED_MESSAGE_LOGGING_ALLOWED' is disabled! Skipping message caching");
+			displaySeparator();
+			return;
+		}
+
+		for (Guild guild : client.getGuilds()) {
+			String blobCachePath = PathUtil.fromBlobCache(guild.getId());
+			PathUtil.ensurePathExists(blobCachePath);
+
+			PathUtil.ensurePathExists(
+					PathUtil.fromGuildFolder(guild.getId(), "blobcache", "messages", "attachments"),
+					false
+			);
+
+			// Loop through all channels and store their messages
+			for (GuildChannel channel : guild.getChannels()) {
+				if (!(channel instanceof GuildMessageChannel messageChannel)) {
+					continue;
+				}
+				File channelJsonFile = FileUtil.ensureFileExists(
+						PathUtil.fromBlobCache(guild.getId(), "messages", STR."\{messageChannel.getId()}.json"),
+						"[]",
+						false
+				);
+				JSONArray messages = new JSONArray();
+
+				// Loop through the message history of the current channel
+				for (Message message : GuildUtil.getFullMessageHistory(messageChannel)) {
+					// Store the message and its contents
+					JSONObject json = new JSONObject();
+					json.put("id", message.getId());
+					json.put("content", message.getContentRaw());
+					json.put("author", message.getAuthor().getId());
+					json.put("attachments", new JSONArray(DataUtil.getAttachmentNamesFromMessage(message)));
+					json.put("time", DataUtil.getCurrentTimeJson());
+					messages.put(json);
+
+					// Store all the attachments that are contained in a message
+					for (Message.Attachment attachment : message.getAttachments()) {
+						String path = PathUtil.fromBlobCache(guild.getId(), "messages", "attachments", message.getId());
+						FileUtil.convertAttachmentToFile(attachment, path, false);
+					}
+				}
+
+				FileUtil.writeToFile(channelJsonFile, messages.toString(2));
+			}
+
+			LoggerUtil.log(STR."Finished caching messages for guild '\{guild.getName()}'.", LogType.INFO, false, true);
+			displaySeparator(true);
+		}
+		LoggerUtil.log("Finished caching messages for all guilds.", LogType.INFO, false, true);
+		displaySeparator();
+	}
+
 	private static void uploadCommands() {
 		client.updateCommands()
 				.addCommands(
 						// Help command
-						Commands.slash("help", "Get more info about my commands yo.")
+						Commands.slash("help", "Get more info about my commands.")
 								.addOption(OptionType.STRING, "command", "Specific command to get more info of."),
 						// Troll command
 						Commands.slash("troll", "Send an anonymous DM to a user on the server.")
 								.addOption(OptionType.USER, "user", "The user to troll.", true)
 								.addOption(OptionType.STRING, "message", "The message to send.", true)
-								.addOption(OptionType.ATTACHMENT, "attachment", "An optional attachment to send with your dumb message."),
+								.addOption(OptionType.ATTACHMENT, "attachment", "An optional attachment to send with your stupid message."),
 						// ObtainTrollLogs command
 						Commands.slash("obtaintrolllogs", "Obtain all logs of the different troll messages sent.")
 								.addOption(OptionType.USER, "from_user", "An optional user to filter the logs.")
@@ -210,41 +313,46 @@ public final class Initialize {
 				.queue(
 						success -> {
 							LoggerUtil.log("All commands were successfully uploaded!", LogType.INFO, false);
-							LoggerUtil.log(logSeparationLine, LogType.INFO, false);
+							displaySeparator();
+							// Log that we're finished with the setup, since this
+							// is the last part of the setup
+							LoggerUtil.log(
+									"PiggyG has successfully finished setting up!",
+									LogType.INFO,
+									false,
+									true
+							);
+							displaySeparator();
 						},
 						error -> {
-							LoggerUtil.log(STR."Failed to upload commands: \{error.getMessage()}", LogType.ERROR, false);
-							LoggerUtil.log(logSeparationLine, LogType.INFO, false);
+							LoggerUtil.error(STR."Failed to upload commands: '\{error.getMessage()}'");
+							displaySeparator();
 						}
 				);
 	}
 
-	public static void checkForMissingGuildFolders() {
-		int missingGuildFoldersFound = 0;
-		for (Guild guild : client.getGuilds()) {
-			String guildFolder = PathUtil.fromGuildFolder(guild.getId());
-			if (!PathUtil.doesPathExist(guildFolder)) {
-				LoggerUtil.log(
-						STR."Folder for guild '\{guild.getName()} (ID = \{guild.getId()}) is missing! Creating new guild folder",
-						LogType.WARN,
-						true
-				);
-				GuildUtil.createNewGuildFolder(guild);
-				LoggerUtil.log(logSeparationSubLine, LogType.INFO, false);
-				missingGuildFoldersFound++;
-			}
-		}
+	//
+ 	// DO NOT WORRY ABOUT THESE FUNCTIONS, THEY ARE
+	// NOT VERY SIGNIFICANT TO PIGGYG'S SETUP.
+	// IGNORE EVERYTHING BEYOND THIS POINT
+	// =========================================================================
 
-		if (missingGuildFoldersFound == 0) {
-			LoggerUtil.log(STR."No missing guild folders were detected!", LogType.INFO, false);
-		} else {
-			LoggerUtil.log(DataUtil.buildString(
-					"Created missing folders for ",
-					STR."\{missingGuildFoldersFound} guild",
-					STR."\{(missingGuildFoldersFound != 1) ? "s" : ""}."
-			), LogType.INFO, false);
-		}
-		LoggerUtil.log(logSeparationLine, LogType.INFO, false);
+	private static void displaySeparator() {
+		displaySeparator(false, true);
+	}
+
+	private static void displaySeparator(boolean isSubSeperator) {
+		displaySeparator(isSubSeperator, true);
+	}
+
+	private static void displaySeparator(boolean isSubSeperator, boolean writeToFile) {
+		LoggerUtil.log(
+				(!isSubSeperator) ? logSeparationLine : logSeparationSubLine,
+				LogType.INFO,
+				false,
+				false,
+				writeToFile
+		);
 	}
 
 	private Initialize() {

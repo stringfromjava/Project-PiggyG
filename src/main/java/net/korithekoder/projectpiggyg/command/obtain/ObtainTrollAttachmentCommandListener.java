@@ -3,7 +3,7 @@ package net.korithekoder.projectpiggyg.command.obtain;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.korithekoder.projectpiggyg.command.PiggyGCommand;
+import net.korithekoder.projectpiggyg.command.Command;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +12,7 @@ import java.io.File;
 /**
  * Command for getting a specific attachment that was sent in a troll message.
  */
-public class ObtainTrollAttachmentCommandListener extends PiggyGCommand {
+public class ObtainTrollAttachmentCommandListener extends Command {
 
 	public ObtainTrollAttachmentCommandListener(String name) {
 		super(name);

@@ -6,10 +6,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.korithekoder.projectpiggyg.command.ILogObtainer;
-import net.korithekoder.projectpiggyg.command.PiggyGCommand;
-import net.korithekoder.projectpiggyg.command.PiggyGLogObtainerCommand;
-import net.korithekoder.projectpiggyg.util.app.LogType;
-import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
+import net.korithekoder.projectpiggyg.command.LogObtainerCommand;
 import net.korithekoder.projectpiggyg.util.data.DataUtil;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
@@ -18,13 +15,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 
 /**
  * Command for getting all the troll logs sent on a server.
  */
-public class ObtainTrollLogsCommandListener extends PiggyGLogObtainerCommand implements ILogObtainer {
+public class ObtainTrollLogsCommandListener extends LogObtainerCommand implements ILogObtainer {
 
 	public ObtainTrollLogsCommandListener(String name) {
 		super(name);
@@ -83,16 +78,19 @@ public class ObtainTrollLogsCommandListener extends PiggyGLogObtainerCommand imp
 	@Override
 	public String generateTextLog(JSONObject info) {
 		StringBuilder sb = new StringBuilder();
-		JSONObject timeSent = DataUtil.getJsonField(info, "time-sent", new JSONObject());
+		JSONObject timeSent = DataUtil.getJsonField(info, "time", new JSONObject());
+		JSONObject author = DataUtil.getJsonField(info, "author", new JSONObject());
+		JSONObject receiver = DataUtil.getJsonField(info, "receiver", new JSONObject());
+		JSONObject attachment = DataUtil.getJsonField(info, "attachment", new JSONObject());
 
 		// Get all necessary attributes of the log
-		String senderUsername = DataUtil.getJsonField(info, "sender-username", "Unknown");
-		String senderId = DataUtil.getJsonField(info, "sender-id", "Unknown");
-		String receiverUsername = DataUtil.getJsonField(info, "receiver-username", "Unknown");
-		String receiverId = DataUtil.getJsonField(info, "receiver-id", "Unknown");
+		String authorUsername = DataUtil.getJsonField(author, "name", "Unknown");
+		String authorId = DataUtil.getJsonField(author, "id", "Unknown");
+		String receiverUsername = DataUtil.getJsonField(receiver, "name", "Unknown");
+		String receiverId = DataUtil.getJsonField(receiver, "id", "Unknown");
 		String message = DataUtil.getJsonField(info, "message", "Unknown");
-		String attachmentName = DataUtil.getJsonField(info, "attachment-name", "One wasn't sent");
-		String attachmentUrl = DataUtil.getJsonField(info, "attachment-url", "One wasn't sent");
+		String attachmentName = DataUtil.getJsonField(attachment, "name", "One wasn't sent");
+		String attachmentUrl = DataUtil.getJsonField(attachment, "url", "One wasn't sent");
 		String yearSent = DataUtil.getJsonField(timeSent, "year", "Unknown");
 		String monthSent = DataUtil.getJsonField(timeSent, "month", "Unknown");
 		String daySent = DataUtil.getJsonField(timeSent, "day", "Unknown");
@@ -103,10 +101,8 @@ public class ObtainTrollLogsCommandListener extends PiggyGLogObtainerCommand imp
 
 		// Combine all info
 		sb.append("-------------------------------------------------------------\n");
-		sb.append(STR."[SENDER USERNAME] \{senderUsername}\n");
-		sb.append(STR."[SENDER ID] \{senderId}\n");
-		sb.append(STR."[RECEIVER USERNAME] \{receiverUsername}\n");
-		sb.append(STR."[RECEIVER ID] \{receiverId}\n");
+		sb.append(STR."[AUTHOR] \{authorUsername} (ID = \{authorId})\n");
+		sb.append(STR."[RECEIVER] \{receiverUsername} (ID = \{receiverId})\n");
 		sb.append(STR."[MESSAGE SENT] \{message}\n");
 		sb.append(STR."[ATTACHMENT NAME] \{!attachmentName.equals("null") ? STR."\"\{attachmentName}\"" : "One wasn't sent"}\n");
 		sb.append(STR."[ATTACHMENT URL] \{!attachmentUrl.equals("null") ? attachmentUrl : "One wasn't sent"}\n");

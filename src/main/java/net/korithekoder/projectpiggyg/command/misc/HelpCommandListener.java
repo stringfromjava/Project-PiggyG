@@ -1,9 +1,8 @@
 package net.korithekoder.projectpiggyg.command.misc;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.korithekoder.projectpiggyg.command.PiggyGCommand;
+import net.korithekoder.projectpiggyg.command.Command;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -14,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Command for getting info about another command.
  */
-public class HelpCommandListener extends PiggyGCommand {
+public class HelpCommandListener extends Command {
 
 	private final Map<String, String> commandDescriptions = new HashMap<>();
 
@@ -26,7 +25,7 @@ public class HelpCommandListener extends PiggyGCommand {
 	protected void onSlashCommandUsed(@NotNull SlashCommandInteractionEvent event) {
 		String command;
 		OptionMapping commandOM = event.getOption("command");
-		List<Command> commands = event.getJDA().retrieveCommands().complete();
+		List<net.dv8tion.jda.api.interactions.commands.Command> commands = event.getJDA().retrieveCommands().complete();
 
 		// Set up the more descriptive pieces of
 		// info for each command
@@ -43,7 +42,7 @@ public class HelpCommandListener extends PiggyGCommand {
 		StringBuilder toSend = new StringBuilder();
 		AtomicBoolean commandFound = new AtomicBoolean(false);
 		if (command == null) {
-			for (Command cmd : commands) {
+			for (net.dv8tion.jda.api.interactions.commands.Command cmd : commands) {
 				toSend.append(STR."`/\{cmd.getName()} ");
 				cmd.getOptions().forEach(option -> toSend.append(STR."<\{option.getName()}> "));
 				toSend.append("`\n")
@@ -96,14 +95,14 @@ public class HelpCommandListener extends PiggyGCommand {
 						a specific troll message. Only users with the "Manage server"
 						permission can use this command.
 						
-						__***TIP:*** When using this command, use `obtaintrolllogs` and then
+						__***TIP:*** When using this command, use `/obtaintrolllogs` and then
 						find a troll log to get a valid name of a file!__
 						""");
 		commandDescriptions
 				.put("obtaintrolllogs", """
 						Sends a `.txt` file with every troll command sent.
 						This includes helpful info such as what time it was sent,
-						what time zone it was sent from, the sender's/receiver's username
+						what time zone it was sent from, the author's/receiver's username
 						and ID, and much more. Only users with the "Manage server"
 						permission can use this command.
 						""");

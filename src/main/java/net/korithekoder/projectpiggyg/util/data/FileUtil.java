@@ -67,6 +67,23 @@ public final class FileUtil {
 	}
 
 	/**
+	 * Attempts to delete a file and logs if successful.
+	 *
+	 * @param path The path of the file to delete.
+	 * @return If the deletion was successful.
+	 */
+	public static boolean deleteFile(String path) {
+		File toDelete = ensureFileExists(path);
+		boolean deleted = toDelete.delete();
+		if (deleted) {
+			LoggerUtil.log(STR."Successfully deleted file in path '\{path}'.", LogType.INFO, false);
+		} else {
+			LoggerUtil.log(STR."Failed to delete file in path '\{path}'.", LogType.WARN, false);
+		}
+		return deleted;
+	}
+
+	/**
 	 * Writes to a file with simplicity and ease.
 	 *
 	 * @param file     The file object to write to.
@@ -148,7 +165,7 @@ public final class FileUtil {
 	 * @return The file instance.
 	 */
 	public static File ensureFileExists(String filePath) {
-		return ensureFileExists(filePath, "");
+		return ensureFileExists(filePath, "", true);
 	}
 
 	/**
@@ -160,13 +177,28 @@ public final class FileUtil {
 	 * @return The file instance.
 	 */
 	public static File ensureFileExists(String filePath, String contents) {
+		return ensureFileExists(filePath, contents, true);
+	}
+
+	/**
+	 * Ensures the existence of a file; if it does NOT exist, then
+	 * a new file (with the same name) will be created.
+	 *
+	 * @param filePath              The path to the file.
+	 * @param contents              Data to add to the file (if it doesn't exist).
+	 * @param logNonExistentWarning Should PiggyG log when the file doesn't exist?
+	 * @return The file instance.
+	 */
+	public static File ensureFileExists(String filePath, String contents, boolean logNonExistentWarning) {
 		File file = Paths.get(filePath).toFile();
 		if (!file.exists()) {
-			LoggerUtil.log(
-					STR."File '\{file.getName()}' in '\{filePath}' is missing!",
-					LogType.WARN,
-					false
-			);
+			if (logNonExistentWarning) {
+				LoggerUtil.log(
+						STR."File '\{file.getName()}' in '\{filePath}' is missing!",
+						LogType.WARN,
+						false
+				);
+			}
 			createFile(file.getName(), PathUtil.ensurePathExists(PathUtil.getFilePath(file)));
 			writeToFile(file, contents);
 		}
@@ -175,23 +207,33 @@ public final class FileUtil {
 
 	/**
 	 * Converts a {@link net.dv8tion.jda.api.entities.Message.Attachment}
-	 * to a {@link java.io.File}. Make sure to delete the file after when you're done
-	 * using it!
+	 * to a {@link java.io.File}.
 	 *
 	 * @param attachment The attachment to convert.
+	 * @param path       The path that the converted file will be stored in.
 	 * @return The attachment as a {@link java.io.File} object.
 	 */
 	@Nullable
-	public static File convertAttachmentToFile(Message.Attachment attachment, String guildId) {
-		try (InputStream in = new URL(attachment.getUrl()).openStream()) {
-			// Paths
-			String taPath = PathUtil.fromGuildFolder(guildId, "trollattachments");
-			String path = PathUtil.fromGuildFolder(guildId, "trollattachments", attachment.getFileName());
-			// Make sure the troll attachments path exists
-			PathUtil.ensurePathExists(taPath);
+	public static File convertAttachmentToFile(Message.Attachment attachment, String path) {
+		return convertAttachmentToFile(attachment, path, true);
+	}
 
-			File file = new File(path);
+	/**
+	 * Converts a {@link net.dv8tion.jda.api.entities.Message.Attachment}
+	 * to a {@link java.io.File}.
+	 *
+	 * @param attachment            The attachment to convert.
+	 * @param path                  The path that the converted file will be stored in.
+	 * @param logNonExistentWarning Should PiggyG log a warning when the path specified doesn't exist?
+	 * @return The attachment as a {@link java.io.File} object.
+	 */
+	@Nullable
+	public static File convertAttachmentToFile(Message.Attachment attachment, String path, boolean logNonExistentWarning) {
+		try (InputStream in = new URL(attachment.getUrl()).openStream()) {
+			// Make sure the passed path exists
+			PathUtil.ensurePathExists(path, logNonExistentWarning);
 			// Copy the data from the attachment to the file
+			File file = new File(PathUtil.constructPath(path, attachment.getFileName()));
 			try (OutputStream out = new FileOutputStream(file)) {
 				byte[] buffer = new byte[8192];
 				int len;

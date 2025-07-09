@@ -30,7 +30,7 @@ public final class LoggerUtil {
 	 * @param info The info to log.
 	 */
 	public static void log(String info) {
-		log(info, LogType.INFO, true, true);
+		log(info, LogType.INFO, true, false, true);
 	}
 
 	/**
@@ -40,7 +40,7 @@ public final class LoggerUtil {
 	 * @param type The type of log being displayed.
 	 */
 	public static void log(String info, LogType type) {
-		log(info, type, true, true);
+		log(info, type, true, false, true);
 	}
 
 	/**
@@ -51,7 +51,19 @@ public final class LoggerUtil {
 	 * @param includeDots Should the new log have {@code ...} at the end of it?
 	 */
 	public static void log(String info, LogType type, boolean includeDots) {
-		log(info, type, includeDots, true);
+		log(info, type, includeDots, false, true);
+	}
+
+	/**
+	 * Logs info into the console and a text file that PiggyG created at startup.
+	 *
+	 * @param info        The info to log.
+	 * @param type        The type of log being displayed.
+	 * @param includeDots Should the new log have {@code ...} at the end of it?
+	 * @param emphasis    Should the log be underlined?
+	 */
+	public static void log(String info, LogType type, boolean includeDots, boolean emphasis) {
+		log(info, type, includeDots, emphasis, true);
 	}
 
 	/**
@@ -60,7 +72,7 @@ public final class LoggerUtil {
 	 * @param info The error message to log.
 	 */
 	public static void error(String info) {
-		log(info, LogType.ERROR, false, true);
+		log(info, LogType.ERROR, false, true, true);
 	}
 
 	/**
@@ -70,7 +82,7 @@ public final class LoggerUtil {
 	 * @param writeToFile Should this log be written to the current log file?
 	 */
 	public static void error(String info, boolean writeToFile) {
-		log(info, LogType.ERROR, false, writeToFile);
+		log(info, LogType.ERROR, false, true, writeToFile);
 	}
 
 	/**
@@ -79,11 +91,12 @@ public final class LoggerUtil {
 	 * @param info        The info to log.
 	 * @param type        The type of log being displayed.
 	 * @param includeDots Should the new log have {@code ...} at the end of it?
+	 * @param emphasis    Should the log be underlined?
 	 * @param writeToFile Should the new log be written to the current log file?
 	 */
-	public static void log(String info, LogType type, boolean includeDots, boolean writeToFile) {
-		String fileLog = constructLog(info, type, includeDots, true);
-		String consoleLog = constructLog(info, type, includeDots, false);
+	public static void log(String info, LogType type, boolean includeDots, boolean emphasis, boolean writeToFile) {
+		String fileLog = constructLog(info, type, includeDots, false, true);
+		String consoleLog = constructLog(info, type, includeDots, emphasis, false);
 		if (writeToFile) {
 			FileUtil.writeToFile(logFile, STR."\{fileLog}\n", true);
 		}
@@ -114,10 +127,10 @@ public final class LoggerUtil {
 		return logFile == null ? null : new File(logFile.getPath());
 	}
 
-	private static String constructLog(String info, LogType type, boolean includeDots, boolean isFileLog) {
+	private static String constructLog(String info, LogType type, boolean includeDots, boolean emphasis, boolean isFileLog) {
 		StringBuilder log = new StringBuilder();
 		String[] logTimes = getFormattedLogTimes();
-		log.append(!isFileLog ? getLogColor(type) : "");
+		log.append(!isFileLog ? getLogColor(type, emphasis) : "");
 		log.append(STR."\{logTimes[0]} ");
 		log.append("[PIGGYG] ");
 		log.append(STR."[\{type}] ");
@@ -127,12 +140,15 @@ public final class LoggerUtil {
 		return log.toString();
 	}
 
-	private static String getLogColor(LogType type) {
+	private static String getLogColor(LogType type, boolean emphasis) {
 		String toReturn = Constants.CONSOLE_TEXT_BOLD;
+		if (emphasis) {
+			toReturn += Constants.CONSOLE_TEXT_UNDERLINE;
+		}
 		switch (type) {
 			case INFO -> toReturn += Constants.CONSOLE_TEXT_PINK;
 			case WARN -> toReturn += Constants.CONSOLE_TEXT_YELLOW;
-			case ERROR -> toReturn += Constants.CONSOLE_TEXT_UNDERLINE + Constants.CONSOLE_TEXT_RED;
+			case ERROR -> toReturn += Constants.CONSOLE_TEXT_RED;
 		}
 		return toReturn;
 	}

@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.korithekoder.projectpiggyg.command.PiggyGLogObtainerCommand;
+import net.korithekoder.projectpiggyg.command.LogObtainerCommand;
 import net.korithekoder.projectpiggyg.util.data.DataUtil;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
@@ -20,7 +20,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.List;
 
-public class ObtainVoiceChannelActionLogsCommandListener extends PiggyGLogObtainerCommand {
+public class ObtainVoiceChannelActionLogsCommandListener extends LogObtainerCommand {
 
 	public ObtainVoiceChannelActionLogsCommandListener(String name) {
 		super(name);
@@ -107,16 +107,20 @@ public class ObtainVoiceChannelActionLogsCommandListener extends PiggyGLogObtain
 	public String generateTextLog(JSONObject info) {
 		StringBuilder sb = new StringBuilder();
 		JSONObject timeSent = DataUtil.getJsonField(info, "time", new JSONObject());
+		JSONObject action = DataUtil.getJsonField(info, "action", new JSONObject());
+		JSONObject channel = DataUtil.getJsonField(info, "channel", new JSONObject());
+		JSONObject affected = DataUtil.getJsonField(info, "affected", new JSONObject());
+		JSONObject inflicter = DataUtil.getJsonField(info, "inflicter", new JSONObject());
 
 		// Get all necessary attributes of the log
-		String affectedUsername = DataUtil.getJsonField(info, "affected-username", "Unknown");
-		String affectedId = DataUtil.getJsonField(info, "affected-id", "Unknown");
-		String inflicterUsername = DataUtil.getJsonField(info, "inflicter-username", "Unknown");
-		String inflicterId = DataUtil.getJsonField(info, "inflicter-id", "Unknown");
-		String actionType = DataUtil.getJsonField(info, "action-type", "Unknown");
-		String actionValue = DataUtil.getJsonField(info, "action-value", "Unknown");
-		String channelName = DataUtil.getJsonField(info, "channel-name", "Unknown");
-		String channelId = DataUtil.getJsonField(info, "channel-id", "Unknown");
+		String affectedUsername = DataUtil.getJsonField(affected, "name", "Unknown");
+		String affectedId = DataUtil.getJsonField(affected, "id", "Unknown");
+		String inflicterUsername = DataUtil.getJsonField(inflicter, "name", "Unknown");
+		String inflicterId = DataUtil.getJsonField(inflicter, "id", "Unknown");
+		String actionType = DataUtil.getJsonField(action, "type", "Unknown");
+		String actionValue = DataUtil.getJsonField(action, "value", "Unknown");
+		String channelName = DataUtil.getJsonField(channel, "name", "Unknown");
+		String channelId = DataUtil.getJsonField(channel, "id", "Unknown");
 		String year = DataUtil.getJsonField(timeSent, "year", "Unknown");
 		String month = DataUtil.getJsonField(timeSent, "month", "Unknown");
 		String day = DataUtil.getJsonField(timeSent, "day", "Unknown");

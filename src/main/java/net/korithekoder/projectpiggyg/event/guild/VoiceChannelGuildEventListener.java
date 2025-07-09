@@ -113,13 +113,14 @@ public class VoiceChannelGuildEventListener extends ListenerAdapter {
 		JSONArray logs = new JSONArray(FileUtil.getFileData(voiceLogsFile));
 		JSONObject logInfo = new JSONObject();
 
-		logInfo.put("member-username", user.getName())
-				.put("member-id", user.getId())
-				.put("channel-joined-name", (channelJoined != null) ? channelJoined.getName() : "No voice channel joined")
-				.put("channel-joined-id", (channelJoined != null) ? channelJoined.getId() : "No voice channel joined")
-				.put("channel-left-name", (channelLeft != null) ? channelLeft.getName() : "No voice channel left")
-				.put("channel-left-id", (channelLeft != null) ? channelLeft.getId() : "No voice channel left")
-				.put("time", DataUtil.createCommandLogTime());
+		logInfo.put("member", DataUtil.createUserInfoJson(user))
+				.put("joined", new JSONObject()
+						.put("name", (channelJoined != null) ? channelJoined.getName() : "No voice channel joined")
+						.put("id", (channelJoined != null) ? channelJoined.getId() : "No voice channel joined"))
+				.put("left", new JSONObject()
+						.put("name", (channelLeft != null) ? channelLeft.getName() : "No voice channel left")
+						.put("id", (channelLeft != null) ? channelLeft.getId() : "No voice channel left"))
+				.put("time", DataUtil.getCurrentTimeJson());
 
 		logs.put(logInfo);
 		FileUtil.writeToFile(voiceLogsFile, logs.toString(2));
@@ -138,14 +139,14 @@ public class VoiceChannelGuildEventListener extends ListenerAdapter {
 
 	private JSONObject generateVoiceChannelActionLog(VoiceActionType voiceActionType, User to, User from, VoiceChannel channel, String value) {
 		return new JSONObject()
-				.put("action-type", voiceActionType)
-				.put("action-value", value)
-				.put("affected-username", to.getName())
-				.put("affected-id", to.getId())
-				.put("inflicter-username", from.getName())
-				.put("inflicter-id", from.getId())
-				.put("channel-name", channel.getName())
-				.put("channel-id", channel.getId())
-				.put("time", DataUtil.createCommandLogTime());
+				.put("action", new JSONObject()
+						.put("type", voiceActionType)
+						.put("value", value))
+				.put("affected", DataUtil.createUserInfoJson(to))
+				.put("inflicter", DataUtil.createUserInfoJson(from))
+				.put("channel", new JSONObject()
+						.put("name", channel.getName())
+						.put("id", channel.getId()))
+				.put("time", DataUtil.getCurrentTimeJson());
 	}
 }
