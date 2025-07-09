@@ -47,7 +47,7 @@ public final class FileUtil {
 		if (!newFile.exists()) {
 			try {
 				if (logInfo) {
-					LoggerUtil.log(STR."Creating new file in '\{newPath}'.");
+					LoggerUtil.log(STR."Creating new file in '\{newPath}'");
 				}
 				newFile.createNewFile();
 			} catch (IOException e) {

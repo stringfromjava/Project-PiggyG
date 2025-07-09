@@ -104,26 +104,17 @@ public final class DataUtil {
 	}
 
 	public static JSONObject createMessageJson(Message message) {
-		Guild guild = message.getGuild();
-		List<Message.Attachment> attachments = message.getAttachments();
 		User author = message.getAuthor();
 		Channel channel = message.getChannel();
 		ChannelType channelType = channel.getType();
-		JSONArray attachmentsArray = new JSONArray();
-
-		for (Message.Attachment attachment : attachments) {
-			attachmentsArray.put(new JSONObject()
-					.put("name", attachment.getFileName())
-					.put("url", attachment.getUrl()));
-		}
+		JSONArray attachmentsArray = new JSONArray(getAttachmentNamesFromMessage(message));
 
 		return new JSONObject()
 				.put("message", new JSONObject()
 						.put("contents", message.getContentRaw())
-						.put("attachments", attachments))
-				.put("channel-type", channelType)
+						.put("attachments", attachmentsArray)
+						.put("id", message.getId()))
 				.put("author", createUserInfoJson(author))
-				.put("guild", createGuildInfoJson(guild))
 				.put("time", getCurrentTimeJson());
 	}
 

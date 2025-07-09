@@ -130,12 +130,33 @@ public final class PathUtil {
 	 * @return The path to the {@code blobcache} folder (with the extra folders for
 	 * the path provided).
 	 */
-	public static String fromBlobCache(String guildId, String... toAppend) {
+	public static String fromGuildBlobCache(String guildId, String... toAppend) {
 		StringBuilder toReturn = new StringBuilder(constructPath(
 				Constants.APP_DATA_DIRECTORY,
 				"guilds",
 				guildId,
 				"blobcache"
+		));
+		for (String path : toAppend) {
+			toReturn.append(path);
+			toReturn.append(Constants.OS_PATH_SEPERATOR);
+		}
+		String s = toReturn.toString();
+		return s.substring(0, s.length() - 1);
+	}
+
+	/**
+	 * Gets the path to the logs folder in a guild folder.
+	 *
+	 * @param guildId The ID of the guild.
+	 * @return The path to the logs folder in a guild folder.
+	 */
+	public static String fromGuildLogs(String guildId, String... toAppend) {
+		StringBuilder toReturn = new StringBuilder(constructPath(
+				Constants.APP_DATA_DIRECTORY,
+				"guilds",
+				guildId,
+				"logs"
 		));
 		for (String path : toAppend) {
 			toReturn.append(path);

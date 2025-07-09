@@ -38,7 +38,6 @@ import net.korithekoder.projectpiggyg.util.git.GitUtil;
 import net.korithekoder.projectpiggyg.util.sys.SystemUtil;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -86,9 +85,9 @@ public final class Initialize {
 				logSystemInfo();
 				logVersionInfo();
 				removeOldLogFiles();
-				registerEventListeners();
 				checkForMissingGuildFolders();
 				cacheGuildMessages();
+				registerEventListeners();
 				uploadCommands(); // This part of the setup should ALWAYS be the last!!
 			}
 
@@ -155,7 +154,7 @@ public final class Initialize {
 		File logsFolder = Paths.get(PathUtil.ofAppData("logs")).toFile();
 		// If the logs folder doesn't exist, then
 		// skip the operation to avoid null errors
-		if (!logsFolder.isDirectory()) {
+		if (!PathUtil.doesPathExist(logsFolder.getPath())) {
 			return;
 		}
 
@@ -176,25 +175,11 @@ public final class Initialize {
 				}
 			}
 		}
-		LoggerUtil.log(STR."Deleted \{staleFilesFound} stale log file\{staleFilesFound != 1 ? "s" : ""}.", LogType.INFO, false, true);
+		LoggerUtil.log(STR."Deleted \{staleFilesFound} stale log file\{staleFilesFound != 1 ? "s" : ""}.", LogType.INFO, false);
 		displaySeparator();
 	}
 
-	private static void registerEventListeners() {
-		// Guild events
-		client.addEventListener(new JoinLeaveGuildEventListener());
-		client.addEventListener(new MessageGuildEventListener());
-		client.addEventListener(new VoiceChannelGuildEventListener());
-		// Command events
-		client.addEventListener(new HelpCommandListener("help"));
-		client.addEventListener(new TrollCommandListener("troll"));
-		client.addEventListener(new ObtainTrollLogsCommandListener("obtaintrolllogs"));
-		client.addEventListener(new ObtainTrollAttachmentCommandListener("obtaintrollattachment"));
-		client.addEventListener(new ObtainVoiceChannelLogs("obtainvoicechannellogs"));
-		client.addEventListener(new ObtainVoiceChannelActionLogsCommandListener("obtainvoicechannelactionlogs"));
-	}
-
-	public static void checkForMissingGuildFolders() {
+	private static void checkForMissingGuildFolders() {
 		int missingGuildFoldersFound = 0;
 		for (Guild guild : client.getGuilds()) {
 			String guildFolder = PathUtil.fromGuildFolder(guild.getId());
@@ -224,59 +209,33 @@ public final class Initialize {
 	}
 
 	private static void cacheGuildMessages() {
-		if (!AppUtil.isConditionalEnabled("DELETED_MESSAGE_LOGGING_ALLOWED")) {
-			LoggerUtil.log(STR."Conditional 'DELETED_MESSAGE_LOGGING_ALLOWED' is disabled! Skipping message caching");
+		boolean msgLoggingAllowed = AppUtil.isConditionalEnabled("MESSAGE_LOGGING_ALLOWED");
+		if (!msgLoggingAllowed) {
+			LoggerUtil.log(STR."Conditional 'MESSAGE_LOGGING_ALLOWED' is disabled! Skipping message caching");
 			displaySeparator();
 			return;
 		}
 
 		for (Guild guild : client.getGuilds()) {
-			String blobCachePath = PathUtil.fromBlobCache(guild.getId());
-			PathUtil.ensurePathExists(blobCachePath);
-
-			PathUtil.ensurePathExists(
-					PathUtil.fromGuildFolder(guild.getId(), "blobcache", "messages", "attachments"),
-					false
-			);
-
-			// Loop through all channels and store their messages
-			for (GuildChannel channel : guild.getChannels()) {
-				if (!(channel instanceof GuildMessageChannel messageChannel)) {
-					continue;
-				}
-				File channelJsonFile = FileUtil.ensureFileExists(
-						PathUtil.fromBlobCache(guild.getId(), "messages", STR."\{messageChannel.getId()}.json"),
-						"[]",
-						false
-				);
-				JSONArray messages = new JSONArray();
-
-				// Loop through the message history of the current channel
-				for (Message message : GuildUtil.getFullMessageHistory(messageChannel)) {
-					// Store the message and its contents
-					JSONObject json = new JSONObject();
-					json.put("id", message.getId());
-					json.put("content", message.getContentRaw());
-					json.put("author", message.getAuthor().getId());
-					json.put("attachments", new JSONArray(DataUtil.getAttachmentNamesFromMessage(message)));
-					json.put("time", DataUtil.getCurrentTimeJson());
-					messages.put(json);
-
-					// Store all the attachments that are contained in a message
-					for (Message.Attachment attachment : message.getAttachments()) {
-						String path = PathUtil.fromBlobCache(guild.getId(), "messages", "attachments", message.getId());
-						FileUtil.convertAttachmentToFile(attachment, path, false);
-					}
-				}
-
-				FileUtil.writeToFile(channelJsonFile, messages.toString(2));
-			}
-
-			LoggerUtil.log(STR."Finished caching messages for guild '\{guild.getName()}'.", LogType.INFO, false, true);
+			GuildUtil.cacheGuildMessages(guild);
 			displaySeparator(true);
 		}
-		LoggerUtil.log("Finished caching messages for all guilds.", LogType.INFO, false, true);
+		LoggerUtil.log("Finished caching messages for all guilds.", LogType.INFO, false);
 		displaySeparator();
+	}
+
+	private static void registerEventListeners() {
+		// Guild events
+		client.addEventListener(new JoinLeaveGuildEventListener());
+		client.addEventListener(new MessageGuildEventListener());
+		client.addEventListener(new VoiceChannelGuildEventListener());
+		// Command events
+		client.addEventListener(new HelpCommandListener("help"));
+		client.addEventListener(new TrollCommandListener("troll"));
+		client.addEventListener(new ObtainTrollLogsCommandListener("obtaintrolllogs"));
+		client.addEventListener(new ObtainTrollAttachmentCommandListener("obtaintrollattachment"));
+		client.addEventListener(new ObtainVoiceChannelLogs("obtainvoicechannellogs"));
+		client.addEventListener(new ObtainVoiceChannelActionLogsCommandListener("obtainvoicechannelactionlogs"));
 	}
 
 	private static void uploadCommands() {
@@ -332,7 +291,7 @@ public final class Initialize {
 	}
 
 	//
- 	// DO NOT WORRY ABOUT THESE FUNCTIONS, THEY ARE
+	// DO NOT WORRY ABOUT THESE FUNCTIONS, THEY ARE
 	// NOT VERY SIGNIFICANT TO PIGGYG'S SETUP.
 	// IGNORE EVERYTHING BEYOND THIS POINT
 	// =========================================================================

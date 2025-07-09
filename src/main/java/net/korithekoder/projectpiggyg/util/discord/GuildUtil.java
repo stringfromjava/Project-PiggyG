@@ -3,16 +3,20 @@ package net.korithekoder.projectpiggyg.util.discord;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageHistory;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.utils.FileUpload;
+import net.korithekoder.projectpiggyg.util.app.AppUtil;
 import net.korithekoder.projectpiggyg.util.app.LogType;
 import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
+import net.korithekoder.projectpiggyg.util.data.DataUtil;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -38,12 +42,16 @@ public final class GuildUtil {
 		String newLogPath = PathUtil.fromGuildFolder(guildId, "logs");
 		String newTAPath = PathUtil.fromGuildFolder(guildId, "trollattachments");
 		String newBlobCachePath = PathUtil.fromGuildFolder(guildId, "blobcache");
+		String newBlobCacheMessagesPath = PathUtil.fromGuildFolder(guildId, "blobcache", "messages");
+		String newBlobCacheMessagesAttachmentsPath = PathUtil.fromGuildFolder(guildId, "blobcache", "messages", "attachments");
 
 		// Create directories
 		PathUtil.createPath(newGuildPath);
 		PathUtil.createPath(newLogPath);
 		PathUtil.createPath(newTAPath);
 		PathUtil.createPath(newBlobCachePath);
+		PathUtil.createPath(newBlobCacheMessagesPath);
+		PathUtil.createPath(newBlobCacheMessagesAttachmentsPath);
 		// Create files
 		File configFile = FileUtil.createFile("config.json", newGuildPath);
 		File trollLogsFile = FileUtil.createFile("troll.json", newLogPath);
@@ -157,13 +165,61 @@ public final class GuildUtil {
 		return messages;
 	}
 
+	public static void cacheGuildMessages(Guild guild) {
+		cacheGuildMessages(guild, true);
+	}
+
+	public static void cacheGuildMessages(Guild guild, boolean logInfo) {
+		if (logInfo) {
+			LoggerUtil.log(STR."Caching messages for guild '\{guild.getName()}' (ID = \{guild.getId()})");
+			boolean msgLoggingAllowed = AppUtil.isConditionalEnabled("MESSAGE_LOGGING_ALLOWED");
+			if (!msgLoggingAllowed) {
+				LoggerUtil.log(STR."Conditional 'MESSAGE_LOGGING_ALLOWED' is disabled! Skipping message caching");
+				return;
+			}
+		}
+
+		String blobCachePath = PathUtil.fromGuildBlobCache(guild.getId());
+		PathUtil.ensurePathExists(blobCachePath);
+
+		PathUtil.ensurePathExists(
+				PathUtil.fromGuildFolder(guild.getId(), "blobcache", "messages", "attachments"),
+				false
+		);
+
+		// Loop through all channels and store their messages
+		for (GuildChannel channel : guild.getChannels()) {
+			if (!(channel instanceof GuildMessageChannel messageChannel)) {
+				continue;
+			}
+			File channelJsonFile = FileUtil.ensureFileExists(
+					PathUtil.fromGuildBlobCache(guild.getId(), "messages", STR."\{messageChannel.getId()}.json"),
+					"[]",
+					false
+			);
+			JSONArray messages = new JSONArray();
+
+			// Loop through the message history of the current channel
+			for (Message message : GuildUtil.getFullMessageHistory(messageChannel)) {
+				messages.put(DataUtil.createMessageJson(message));
+				// Store all the attachments that are contained in a message
+				for (Message.Attachment attachment : message.getAttachments()) {
+					String path = PathUtil.fromGuildBlobCache(guild.getId(), "messages", "attachments", message.getId());
+					FileUtil.convertAttachmentToFile(attachment, path, false);
+				}
+			}
+
+			FileUtil.writeToFile(channelJsonFile, messages.toString(2));
+		}
+	}
+
 	/**
 	 * Creates default data for a {@code config.json} file.
 	 *
 	 * @return A string of the default data.
 	 */
 	public static String generateDefaultConfigJson() {
-		JSONObject config = new JSONObject("{}");
+		JSONObject config = new JSONObject();
 		config.put("disable-trolls-globally", false);
 		config.put("blocked-troll-users", List.of());
 		return config.toString(2);

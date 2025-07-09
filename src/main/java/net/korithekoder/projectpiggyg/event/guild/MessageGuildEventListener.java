@@ -23,7 +23,7 @@ public class MessageGuildEventListener extends ListenerAdapter {
 		Guild guild = event.getGuild();
 		Channel channel = event.getChannel();
 		File logsFile = FileUtil.ensureFileExists(
-				PathUtil.fromBlobCache(
+				PathUtil.fromGuildBlobCache(
 						guild.getId(),
 						"messages",
 						STR."\{channel.getId()}.json"
@@ -43,6 +43,12 @@ public class MessageGuildEventListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageDelete(@NotNull MessageDeleteEvent event) {
-		// TODO: Do this later
+		Guild guild = event.getGuild();
+		File deletedMessageLogFile = FileUtil.ensureFileExists(
+				PathUtil.fromGuildLogs(guild.getId(), "deleted-message.json")
+		);
+		JSONArray deletedMessages = new JSONArray(FileUtil.getFileData(deletedMessageLogFile));
+		deletedMessages.put(event.getMessageId());
+		FileUtil.writeToFile(deletedMessageLogFile, deletedMessages.toString(2));
 	}
 }
