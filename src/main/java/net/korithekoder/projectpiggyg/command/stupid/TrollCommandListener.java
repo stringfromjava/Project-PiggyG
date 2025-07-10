@@ -5,8 +5,10 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.korithekoder.projectpiggyg.command.Command;
+import net.korithekoder.projectpiggyg.command.CommandListener;
+import net.korithekoder.projectpiggyg.data.command.CommandOptionData;
 import net.korithekoder.projectpiggyg.util.data.DataUtil;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
@@ -21,10 +23,21 @@ import java.util.List;
 /**
  * The iconic command for sending anonymous DMs to users with PiggyG.
  */
-public class TrollCommandListener extends Command {
+public class TrollCommandListener extends CommandListener {
 
 	public TrollCommandListener(String name) {
 		super(name);
+		description = "Send an anonymous DM to a user on the server.";
+		helpDescription = """
+				Allows you to send an anonymous DM with PiggyG to anyone
+				on the server that either hasn't blocked trolls (or hasn't blocked
+				PiggyG entirely :broken_heart:).
+				""";
+		options = List.of(
+				new CommandOptionData(OptionType.USER, "user", "The user to troll.", true),
+				new CommandOptionData(OptionType.STRING, "message", "The message to send.", true),
+				new CommandOptionData(OptionType.ATTACHMENT, "attachment", "An optional attachment to send with your stupid message.", false)
+		);
 	}
 
 	@Override

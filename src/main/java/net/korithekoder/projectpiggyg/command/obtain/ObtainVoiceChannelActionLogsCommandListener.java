@@ -1,14 +1,18 @@
 package net.korithekoder.projectpiggyg.command.obtain;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.korithekoder.projectpiggyg.command.LogObtainerCommand;
+import net.korithekoder.projectpiggyg.command.LogObtainerCommandListener;
+import net.korithekoder.projectpiggyg.data.command.CommandOptionData;
 import net.korithekoder.projectpiggyg.util.data.DataUtil;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
@@ -20,18 +24,33 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.List;
 
-public class ObtainVoiceChannelActionLogsCommandListener extends LogObtainerCommand {
+/**
+ * Command for getting logs of users muting/deafening other users.
+ */
+public class ObtainVoiceChannelActionLogsCommandListener extends LogObtainerCommandListener {
 
 	public ObtainVoiceChannelActionLogsCommandListener(String name) {
 		super(name);
+		description = "Gets logs from users (typically admins) server muting/deafening other members in voice channels.";
+		helpDescription = """
+				Gets all logs of users (usually admins) server muting/deafening other users.
+				Pretty helpful for catching admins abusing their power! Only users with the
+				"Manage server" permission can use this command.
+				""";
+		options = List.of(
+				new CommandOptionData(OptionType.USER, "affected_user", "An optional affected user that was muted/deafened to obtain specific logs from.", false),
+				new CommandOptionData(OptionType.USER, "from_user", "An optional inflicting user that muted/deafened another user to obtain specific logs from.", false),
+				new CommandOptionData(OptionType.CHANNEL, "voice_channel", "An optional voice channel to obtain specific logs from.", false)
+		);
+		memberPermissions = DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER);
 	}
 
 	@Override
 	protected void onSlashCommandUsed(@NotNull SlashCommandInteractionEvent event) {
+		Guild guild = event.getGuild();
 		User affectedUser = null;
 		User fromUser = null;
 		VoiceChannel voiceChannel = null;
-		Guild guild = event.getGuild();
 		OptionMapping affectedUserOM = event.getOption("affected_user");
 		OptionMapping fromUserOM = event.getOption("from_user");
 		OptionMapping voiceChannelOM = event.getOption("voice_channel");

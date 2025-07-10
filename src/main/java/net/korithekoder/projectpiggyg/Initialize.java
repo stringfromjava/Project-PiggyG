@@ -3,17 +3,10 @@ package net.korithekoder.projectpiggyg;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.JDAInfo;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.ExceptionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -25,7 +18,7 @@ import net.korithekoder.projectpiggyg.command.obtain.ObtainVoiceChannelLogs;
 import net.korithekoder.projectpiggyg.command.stupid.TrollCommandListener;
 import net.korithekoder.projectpiggyg.data.Constants;
 import net.korithekoder.projectpiggyg.event.guild.JoinLeaveGuildEventListener;
-import net.korithekoder.projectpiggyg.event.guild.MessageGuildEventListener;
+import net.korithekoder.projectpiggyg.event.guild.MessageCacheGuildEventListener;
 import net.korithekoder.projectpiggyg.event.guild.VoiceChannelGuildEventListener;
 import net.korithekoder.projectpiggyg.util.app.AppUtil;
 import net.korithekoder.projectpiggyg.util.app.LogType;
@@ -34,10 +27,10 @@ import net.korithekoder.projectpiggyg.util.data.DataUtil;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
 import net.korithekoder.projectpiggyg.util.discord.GuildUtil;
+import net.korithekoder.projectpiggyg.util.discord.CommandUtil;
 import net.korithekoder.projectpiggyg.util.git.GitUtil;
 import net.korithekoder.projectpiggyg.util.sys.SystemUtil;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -213,6 +206,12 @@ public final class Initialize {
 		if (!msgLoggingAllowed) {
 			LoggerUtil.log(STR."Conditional 'MESSAGE_LOGGING_ALLOWED' is disabled! Skipping message caching");
 			displaySeparator();
+			// Remove all blob cache folders from each guild folder
+			// to save and conserve memory
+			for (Guild guild : client.getGuilds()) {
+				String blobCachePath = PathUtil.fromGuildFolder(guild.getId(), "blobcache");
+				PathUtil.deleteFolder(blobCachePath);
+			}
 			return;
 		}
 
@@ -227,67 +226,42 @@ public final class Initialize {
 	private static void registerEventListeners() {
 		// Guild events
 		client.addEventListener(new JoinLeaveGuildEventListener());
-		client.addEventListener(new MessageGuildEventListener());
+		client.addEventListener(new MessageCacheGuildEventListener());
 		client.addEventListener(new VoiceChannelGuildEventListener());
-		// Command events
-		client.addEventListener(new HelpCommandListener("help"));
-		client.addEventListener(new TrollCommandListener("troll"));
-		client.addEventListener(new ObtainTrollLogsCommandListener("obtaintrolllogs"));
-		client.addEventListener(new ObtainTrollAttachmentCommandListener("obtaintrollattachment"));
-		client.addEventListener(new ObtainVoiceChannelLogs("obtainvoicechannellogs"));
-		client.addEventListener(new ObtainVoiceChannelActionLogsCommandListener("obtainvoicechannelactionlogs"));
 	}
 
 	private static void uploadCommands() {
-		client.updateCommands()
-				.addCommands(
-						// Help command
-						Commands.slash("help", "Get more info about my commands.")
-								.addOption(OptionType.STRING, "command", "Specific command to get more info of."),
-						// Troll command
-						Commands.slash("troll", "Send an anonymous DM to a user on the server.")
-								.addOption(OptionType.USER, "user", "The user to troll.", true)
-								.addOption(OptionType.STRING, "message", "The message to send.", true)
-								.addOption(OptionType.ATTACHMENT, "attachment", "An optional attachment to send with your stupid message."),
-						// ObtainTrollLogs command
-						Commands.slash("obtaintrolllogs", "Obtain all logs of the different troll messages sent.")
-								.addOption(OptionType.USER, "from_user", "An optional user to filter the logs.")
-								.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER)),
-						// ObtainTrollAttachment command
-						Commands.slash("obtaintrollattachment", "Gets an attachment that was sent in a troll message.")
-								.addOption(OptionType.STRING, "attachment_name", "The file name of the attachment sent.", true)
-								.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER)),
-						// ObtainVoiceChannelLogs
-						Commands.slash("obtainvoicechannellogs", "Gets logs from people interacting with and in voice channels.")
-								.addOption(OptionType.USER, "user", "An optional user to obtain specific logs from.")
-								.addOption(OptionType.CHANNEL, "voice_channel", "An optional voice channel to obtain specific logs from.")
-								.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER)),
-						// ObtainVoiceChannelLogs
-						Commands.slash("obtainvoicechannelactionlogs", "Gets logs from users (typically admins) server muting/deafening other members in voice channels.")
-								.addOption(OptionType.USER, "affected_user", "An optional affected user that was muted/deafened to obtain specific logs from.")
-								.addOption(OptionType.USER, "from_user", "An optional inflicting user that muted/deafened another user to obtain specific logs from.")
-								.addOption(OptionType.CHANNEL, "voice_channel", "An optional voice channel to obtain specific logs from.")
-								.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
+		client.updateCommands().addCommands(
+				CommandUtil.createCommandData(
+						client,
+						new TrollCommandListener("troll")
+				),
+				CommandUtil.createCommandData(
+						client,
+						new ObtainTrollLogsCommandListener("obtaintrolllogs")
+				),
+				CommandUtil.createCommandData(
+						client,
+						new ObtainTrollAttachmentCommandListener("obtaintrollattachment")
+				),
+				CommandUtil.createCommandData(
+						client,
+						new ObtainVoiceChannelLogs("obtainvoicechannellogs")
+				),
+				CommandUtil.createCommandData(
+						client,
+						new ObtainVoiceChannelActionLogsCommandListener("obtainvoicechannelactionlogs")
+				),
+				CommandUtil.createCommandData(
+						client,
+						new HelpCommandListener("help")
 				)
-				.queue(
-						success -> {
-							LoggerUtil.log("All commands were successfully uploaded!", LogType.INFO, false);
-							displaySeparator();
-							// Log that we're finished with the setup, since this
-							// is the last part of the setup
-							LoggerUtil.log(
-									"PiggyG has successfully finished setting up!",
-									LogType.INFO,
-									false,
-									true
-							);
-							displaySeparator();
-						},
-						error -> {
-							LoggerUtil.error(STR."Failed to upload commands: '\{error.getMessage()}'");
-							displaySeparator();
-						}
-				);
+		).queue(
+				success -> {
+					LoggerUtil.log("All commands have been uploaded.", LogType.INFO, false);
+					displaySeparator();
+				}
+		);
 	}
 
 	//

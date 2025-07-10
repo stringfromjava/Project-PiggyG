@@ -1,12 +1,16 @@
 package net.korithekoder.projectpiggyg.command.obtain;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.korithekoder.projectpiggyg.command.ILogObtainer;
-import net.korithekoder.projectpiggyg.command.LogObtainerCommand;
+import net.korithekoder.projectpiggyg.command.LogObtainerCommandListener;
+import net.korithekoder.projectpiggyg.data.command.CommandOptionData;
 import net.korithekoder.projectpiggyg.util.data.DataUtil;
 import net.korithekoder.projectpiggyg.util.data.FileUtil;
 import net.korithekoder.projectpiggyg.util.data.PathUtil;
@@ -15,14 +19,28 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Command for getting all the troll logs sent on a server.
  */
-public class ObtainTrollLogsCommandListener extends LogObtainerCommand implements ILogObtainer {
+public class ObtainTrollLogsCommandListener extends LogObtainerCommandListener implements ILogObtainer {
 
 	public ObtainTrollLogsCommandListener(String name) {
 		super(name);
+		description = "Obtain all logs of the different troll messages sent.";
+		helpDescription = """
+				Sends a `.txt` file with every troll command sent.
+				This includes helpful info such as what time it was sent,
+				what time zone it was sent from, the author's/receiver's username
+				and ID, and much more. Only users with the "Manage server"
+				permission can use this command.
+				""";
+		memberPermissions = DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER);
+		options = List.of(
+				new CommandOptionData(OptionType.USER, "from_user", "An optional user to filter the logs.", false)
+		);
+		memberPermissions = DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER);
 	}
 
 	@Override

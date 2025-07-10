@@ -83,7 +83,7 @@ public final class UserUtil {
 							);
 							if (failure instanceof ErrorResponseException err && err.getErrorCode() == 10062) {
 								// The command timed out (not sent in 3 seconds)
-								LoggerUtil.log("Command reply timed out! (interaction expired)", LogType.WARN, false);
+								LoggerUtil.log("CommandListener reply timed out! (interaction expired)", LogType.WARN, false);
 							}
 							LoggerUtil.log(failMsg, LogType.WARN, false);
 							throw new RuntimeException(failMsg);

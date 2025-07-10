@@ -3,7 +3,9 @@ package net.korithekoder.projectpiggyg.command;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.utils.FileUpload;
+import net.korithekoder.projectpiggyg.data.command.CommandOptionData;
 import net.korithekoder.projectpiggyg.util.app.LogType;
 import net.korithekoder.projectpiggyg.util.app.LoggerUtil;
 import net.korithekoder.projectpiggyg.util.data.DataUtil;
@@ -19,11 +21,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Simple class for new commands to extend to.
  * All this really does is make every command do checks when things
  * don't exist or to prevent errors.
+ * <p>
+ * TIP: It's recommended for your subclasses to call {@code super(name)}
+ * and then set the other attributes in your subclass's constructor accordingly.
  * <p>
  * When you make a new command, make sure to do two things:
  * <p>
@@ -34,33 +41,74 @@ import java.nio.file.StandardCopyOption;
  * <b>!! IMPORTANT !!</b>: Make sure to call the super method(s) when extending
  * to this class, or otherwise this class will be useless!
  */
-public abstract class Command extends ListenerAdapter {
+public abstract class CommandListener extends ListenerAdapter {
 
-	private final String name;
-	private final boolean isGuildCommand;
+	/**
+	 * The name of {@code this} command that will be used when uploaded to Discord.
+	 */
+	protected String name;
+
+	/**
+	 * The description of {@code this} command that will be used when uploaded to Discord.
+	 */
+	protected String description;
+
+	/**
+	 * The description of {@code this} command that's displayed when the
+	 * user uses the {@code /help} command.
+	 */
+	protected String helpDescription;
+
+	/**
+	 * Can {@code this} command only be used on a guild?
+	 */
+	protected boolean isGuildCommand;
+
+	/**
+	 * The permissions for {@code this} command. This will determine who and
+	 * which members on a guild can use {@code this} command.
+	 */
+	protected DefaultMemberPermissions memberPermissions;
+
+	/**
+	 * The options that are used with {@code this} command.
+	 */
+	protected Collection<CommandOptionData> options;
 
 	/**
 	 * @param name The name of {@code this} command.
 	 */
-	public Command(String name) {
-		this(name, true);
-	}
-
-	/**
-	 * @param name           The name of {@code this} command.
-	 * @param isGuildCommand Can this command only be used on a guild?
-	 */
-	public Command(String name, boolean isGuildCommand) {
+	public CommandListener(String name) {
 		this.name = name;
-		this.isGuildCommand = isGuildCommand;
+		description = "<No description was set by the developer for this command.>";
+		helpDescription = description;
+		isGuildCommand = true;
+		memberPermissions = DefaultMemberPermissions.ENABLED;
+		options = List.of();
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public boolean getIsGuildCommand() {
+	public String getDescription() {
+		return description;
+	}
+
+	public String getHelpDescription() {
+		return helpDescription;
+	}
+
+	public boolean isGuildCommand() {
 		return isGuildCommand;
+	}
+
+	public DefaultMemberPermissions getMemberPermissions() {
+		return memberPermissions;
+	}
+
+	public Collection<CommandOptionData> getOptions() {
+		return options;
 	}
 
 	@Override

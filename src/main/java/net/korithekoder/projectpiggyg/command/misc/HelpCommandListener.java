@@ -2,23 +2,31 @@ package net.korithekoder.projectpiggyg.command.misc;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.korithekoder.projectpiggyg.command.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.korithekoder.projectpiggyg.command.CommandListener;
+import net.korithekoder.projectpiggyg.data.command.CommandOptionData;
+import net.korithekoder.projectpiggyg.util.discord.CommandUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Command for getting info about another command.
  */
-public class HelpCommandListener extends Command {
-
-	private final Map<String, String> commandDescriptions = new HashMap<>();
+public class HelpCommandListener extends CommandListener {
 
 	public HelpCommandListener(String name) {
 		super(name);
+		description = "Get more info about my commands.";
+		helpDescription = """
+				Get more helpful info for either all commands or a specific command.
+				
+				TIP: You can put in a specific command to get more details about it!
+				""";
+		options = List.of(
+				new CommandOptionData(OptionType.STRING, "command", "Specific command to get more info of.", false)
+		);
 	}
 
 	@Override
@@ -26,10 +34,6 @@ public class HelpCommandListener extends Command {
 		String command;
 		OptionMapping commandOM = event.getOption("command");
 		List<net.dv8tion.jda.api.interactions.commands.Command> commands = event.getJDA().retrieveCommands().complete();
-
-		// Set up the more descriptive pieces of
-		// info for each command
-		assignDescriptions();
 
 		if (commandOM != null) {
 			command = commandOM.getAsString();
@@ -64,7 +68,7 @@ public class HelpCommandListener extends Command {
 										.append(STR." - \{option.getDescription()}\n\n")
 						);
 						toSend.append("## Description\n");
-						toSend.append(commandDescriptions.get(cmd.getName()));
+						toSend.append(CommandUtil.getHelpDescription(cmd.getName()));
 						event.reply(toSend.toString()).queue();
 						commandFound.set(true);
 					});
@@ -72,52 +76,7 @@ public class HelpCommandListener extends Command {
 			if (commandFound.get()) {
 				return;
 			}
-			// Reply saying the command wasn't found if it doesn't exist
 			event.reply("Sorry fam', but the command given wasn't found :pensive:").queue();
 		}
-	}
-
-	private void assignDescriptions() {
-		// For any new commands, put a help (*better) description here!
-		commandDescriptions
-				.put("help", """
-						...
-						""");
-		commandDescriptions
-				.put("troll", """
-						Allows you to send an anonymous DM with PiggyG to anyone
-						on the server that either hasn't blocked trolls (or hasn't blocked
-						PiggyG entirely :broken_heart:).
-						""");
-		commandDescriptions
-				.put("obtaintrollattachment", """
-						Permits you to get a specific attachment that was sent on
-						a specific troll message. Only users with the "Manage server"
-						permission can use this command.
-						
-						__***TIP:*** When using this command, use `/obtaintrolllogs` and then
-						find a troll log to get a valid name of a file!__
-						""");
-		commandDescriptions
-				.put("obtaintrolllogs", """
-						Sends a `.txt` file with every troll command sent.
-						This includes helpful info such as what time it was sent,
-						what time zone it was sent from, the author's/receiver's username
-						and ID, and much more. Only users with the "Manage server"
-						permission can use this command.
-						""");
-		commandDescriptions
-				.put("obtainvoicechannellogs", """
-						Gets all logs of people joining and leaving voice channels.
-						You can also optionally put in a user an a channel to
-						filter the logs as well. Only users with the "Manage server"
-						permission can use this command.
-						""");
-		commandDescriptions
-				.put("obtainvoicechannelactionlogs", """
-						Gets all logs of users (usually admins) server muting/deafening other users.
-						Pretty helpful for catching admins abusing their power! Only users with the
-						"Manage server" permission can use this command.
-						""");
 	}
 }

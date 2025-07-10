@@ -55,9 +55,18 @@ public final class PathUtil {
 	/**
 	 * Deletes a folder and it's contents by using recursion.
 	 *
-	 * @param path The folder to delete.
+	 * @param path The folder to delete as a string.
 	 */
-	public static void deletePath(Path path) {
+	public static void deleteFolder(String path) {
+		deleteFolder(Paths.get(path));
+	}
+
+	/**
+	 * Deletes a folder and it's contents by using recursion.
+	 *
+	 * @param path The folder to delete as a {@link java.nio.file.Path}.
+	 */
+	public static void deleteFolder(Path path) {
 		final int maxRetries = 10;
 		final int retryDelayMs = 1000;  // 1 second
 		int attempt = 0;
@@ -68,7 +77,7 @@ public final class PathUtil {
 				if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
 					try (DirectoryStream<Path> entries = Files.newDirectoryStream(path)) {
 						for (Path entry : entries) {
-							deletePath(entry);
+							deleteFolder(entry);
 						}
 					}
 				}

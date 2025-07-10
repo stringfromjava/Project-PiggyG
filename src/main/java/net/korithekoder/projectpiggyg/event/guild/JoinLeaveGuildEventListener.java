@@ -37,6 +37,6 @@ public class JoinLeaveGuildEventListener extends ListenerAdapter {
 	public void onGuildLeave(@NotNull GuildLeaveEvent event) {
 		Guild guild = event.getGuild();
 		String guildFolder = PathUtil.ofAppData("servers", guild.getId());
-		PathUtil.deletePath(Paths.get(guildFolder));
+		PathUtil.deleteFolder(Paths.get(guildFolder));
 	}
 }

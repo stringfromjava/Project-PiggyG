@@ -14,10 +14,11 @@ import java.nio.file.Files;
 /**
  * Abstract class for commands specifically for getting logs.
  */
-public abstract class LogObtainerCommand extends Command implements ILogObtainer {
+public abstract class LogObtainerCommandListener extends CommandListener implements ILogObtainer {
 
-	public LogObtainerCommand(String name) {
-		super(name, true); // Must always be a guild command
+	public LogObtainerCommandListener(String name) {
+		super(name);
+		isGuildCommand = true; // Must always be a guild command
 	}
 
 	/**
