@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.stringfromjava.projectpiggyg.command.ILogObtainer;
 import net.stringfromjava.projectpiggyg.command.LogObtainerCommandListener;
-import net.stringfromjava.projectpiggyg.data.Constants;
+import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.data.command.CommandOptionData;
 import net.stringfromjava.projectpiggyg.util.data.JsonUtil;
 import net.stringfromjava.projectpiggyg.util.data.FileUtil;
@@ -89,13 +89,13 @@ public class ObtainTrollLogsCommandListener extends LogObtainerCommandListener i
 		// Create a temporary text file to send with the logs
 		File logFile = generateLogFile(filteredLogs, "troll-logs");
 		if (logFile != null) {
-			CommandUtil.sendSafeCommandReply(
+			CommandUtil.sendSafeReply(
 					"",
 					event,
 					List.of(FileUpload.fromData(logFile, logFile.getName()))
 			);
 		} else {
-			CommandUtil.sendSafeCommandReply("Sorry bruv, but I couldn't get the troll logs... :pensive:", event);
+			CommandUtil.sendSafeReply("Sorry bruv, but I couldn't get the troll logs... :pensive:", event);
 		}
 	}
 

@@ -1,6 +1,6 @@
 package net.stringfromjava.projectpiggyg.util.data;
 
-import net.stringfromjava.projectpiggyg.data.Constants;
+import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.util.app.LogType;
 import net.stringfromjava.projectpiggyg.util.app.LoggerUtil;
 import net.stringfromjava.projectpiggyg.util.sys.PlatformType;
@@ -93,13 +93,7 @@ public final class PathUtil {
 				// Give up if too many attempts were made
 				if (attempt >= maxRetries) {
 					LoggerUtil.log(
-							JsonUtil.buildString(
-									"Failed to delete directory '",
-									path.toString(),
-									"'!",
-									"Error Message: ",
-									e.getMessage()
-							),
+							STR."Failed to delete directory '\{path.toString()}! Error Message: \{e.getMessage()}",
 							LogType.WARN,
 							false
 					);

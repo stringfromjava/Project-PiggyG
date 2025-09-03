@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.stringfromjava.projectpiggyg.data.Constants;
+import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.util.app.LogType;
 import net.stringfromjava.projectpiggyg.util.app.LoggerUtil;
 import net.stringfromjava.projectpiggyg.util.data.PathUtil;

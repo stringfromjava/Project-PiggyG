@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.stringfromjava.projectpiggyg.command.CommandListener;
-import net.stringfromjava.projectpiggyg.data.Constants;
+import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.data.command.CommandOptionData;
 import net.stringfromjava.projectpiggyg.util.data.PathUtil;
 import net.stringfromjava.projectpiggyg.util.discord.CommandUtil;
@@ -50,13 +50,13 @@ public class ObtainTrollAttachmentCommandListener extends CommandListener {
 		);
 
 		if (trollAttachment.exists()) {
-			CommandUtil.sendSafeCommandReply(
+			CommandUtil.sendSafeReply(
 					"",
 					event,
 					List.of(FileUpload.fromData(trollAttachment, attachmentName))
 			);
 		} else {
-			CommandUtil.sendSafeCommandReply("Sorry dawg, I couldn't find the file with that name...", event);
+			CommandUtil.sendSafeReply("Sorry dawg, I couldn't find the file with that name...", event);
 		}
 	}
 }

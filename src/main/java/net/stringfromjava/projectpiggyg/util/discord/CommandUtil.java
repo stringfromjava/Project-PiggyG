@@ -58,8 +58,8 @@ public final class CommandUtil {
 	 * @param message The message to send.
 	 * @param event   The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} to send a reply with.
 	 */
-	public static void sendSafeCommandReply(String message, SlashCommandInteractionEvent event) {
-		sendSafeCommandReply(message, event, null, null, null);
+	public static void sendSafeReply(String message, SlashCommandInteractionEvent event) {
+		sendSafeReply(message, event, null, null, null);
 	}
 
 	/**
@@ -69,8 +69,8 @@ public final class CommandUtil {
 	 * @param event   The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} to send a reply with.
 	 * @param files   Optional files to send with the reply.
 	 */
-	public static void sendSafeCommandReply(String message, SlashCommandInteractionEvent event, Collection<FileUpload> files) {
-		sendSafeCommandReply(message, event, files, null, null);
+	public static void sendSafeReply(String message, SlashCommandInteractionEvent event, Collection<FileUpload> files) {
+		sendSafeReply(message, event, files, null, null);
 	}
 
 	/**
@@ -81,8 +81,8 @@ public final class CommandUtil {
 	 * @param files     Optional files to send with the reply.
 	 * @param onSuccess Callback function to be triggered when the message was successfully sent.
 	 */
-	public static void sendSafeCommandReply(String message, SlashCommandInteractionEvent event, Collection<FileUpload> files, Runnable onSuccess) {
-		sendSafeCommandReply(message, event, files, onSuccess, null);
+	public static void sendSafeReply(String message, SlashCommandInteractionEvent event, Collection<FileUpload> files, Runnable onSuccess) {
+		sendSafeReply(message, event, files, onSuccess, null);
 	}
 
 	/**
@@ -94,7 +94,7 @@ public final class CommandUtil {
 	 * @param onSuccess Callback function to be triggered when the message was successfully sent.
 	 * @param onFailure Callback function to be triggered when the message failed to send.
 	 */
-	public static void sendSafeCommandReply(@Nullable String message, @NotNull SlashCommandInteractionEvent event, @Nullable Collection<FileUpload> files, @Nullable Runnable onSuccess, @Nullable Runnable onFailure) {
+	public static void sendSafeReply(@Nullable String message, @NotNull SlashCommandInteractionEvent event, @Nullable Collection<FileUpload> files, @Nullable Runnable onSuccess, @Nullable Runnable onFailure) {
 		event.reply((message != null) ? message : "")
 				.addFiles((files != null) ? files : List.of())
 				.submit()

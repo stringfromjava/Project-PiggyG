@@ -1,4 +1,4 @@
-package net.stringfromjava.projectpiggyg.data;
+package net.stringfromjava.projectpiggyg.util;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -110,8 +110,7 @@ public final class Constants {
 		public static final String GUILD_BLOB_CACHE_MESSAGES_ATTACHMENT_FOLDER_NAME = "attachments";
 
 		/**
-		 * The file name for what the troll command log
-		 * file is called.
+		 * The file name for what the said guild's config file is called.
 		 */
 		public static final String GUILD_CONFIG_FILE_NAME = "config.json";
 

@@ -76,15 +76,13 @@ public final class UserUtil {
 							if (onFailure != null) {
 								onFailure.run();
 							}
-							String failMsg = JsonUtil.buildString(
-									"Could not send DM to user ",
-									user.getName(),
-									", they either blocked PiggyG (so sad), have their DMs closed, or the message timed out!"
-							);
+
+							String failMsg = STR."Could not send DM to user \{user.getName()}, they either blocked PiggyG (so sad), have their DMs closed, or the message timed out!";
 							if (failure instanceof ErrorResponseException err && err.getErrorCode() == 10062) {
 								// The command timed out (not sent in 3 seconds)
 								LoggerUtil.log("CommandListener reply timed out! (interaction expired)", LogType.WARN, false);
 							}
+
 							LoggerUtil.log(failMsg, LogType.WARN, false);
 							throw new RuntimeException(failMsg);
 						}

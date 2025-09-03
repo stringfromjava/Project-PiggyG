@@ -54,7 +54,7 @@ public class HelpCommandListener extends CommandListener {
 						.append(STR."\t\{cmd.getDescription()}\n")
 						.append("------------------------------------------------------------\n");
 			}
-			CommandUtil.sendSafeCommandReply(toSend.toString(), event);
+			CommandUtil.sendSafeReply(toSend.toString(), event);
 		} else {
 			// Get the wanted command with more descriptive info
 			commands.stream()
@@ -77,7 +77,7 @@ public class HelpCommandListener extends CommandListener {
 			if (commandFound.get()) {
 				return;
 			}
-			CommandUtil.sendSafeCommandReply("Sorry fam', but the command given wasn't found :pensive:", event);
+			CommandUtil.sendSafeReply("Sorry fam', but the command given wasn't found :pensive:", event);
 		}
 	}
 }

@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.stringfromjava.projectpiggyg.command.LogObtainerCommandListener;
-import net.stringfromjava.projectpiggyg.data.Constants;
+import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.data.command.CommandOptionData;
 import net.stringfromjava.projectpiggyg.util.data.JsonUtil;
 import net.stringfromjava.projectpiggyg.util.data.FileUtil;
@@ -77,7 +77,7 @@ public class ObtainDeletedMessagesCommandListener extends LogObtainerCommandList
 		JSONArray obtained = new JSONArray();
 
 		if (!(channel instanceof GuildMessageChannel)) {
-			CommandUtil.sendSafeCommandReply(
+			CommandUtil.sendSafeReply(
 					"Brother, you need to put in a channel where you can __*SEND MESSAGES*__, not whatever bullshit you tried to feed me :sob::pray:",
 					event
 			);
@@ -91,29 +91,19 @@ public class ObtainDeletedMessagesCommandListener extends LogObtainerCommandList
 		}
 
 		if (amount < 0 || amount > deletedMessageIds.length()) {
-			CommandUtil.sendSafeCommandReply(
+			CommandUtil.sendSafeReply(
 					"Bruh, you can't go back that far in the history :man_facepalming:",
 					event
 			);
 			return;
 		}
 
-		for (int i = 0; i < amount; i++) {
-			if (!(deletedMessageIds.get(i) instanceof String deletedMsgId)) {
-				continue;
-			}
-			JSONObject log = getCachedMessageById(cachedMessages, deletedMsgId);
-			if (log != null) {
-				obtained.put(log);
-			}
-		}
-
 		File toSend = generateLogFile(obtained, "deleted-messages");
 
 		if (!obtained.isEmpty()) {
-			CommandUtil.sendSafeCommandReply(null, event, List.of(FileUpload.fromData(toSend)));
+			CommandUtil.sendSafeReply(null, event, List.of(FileUpload.fromData(toSend)));
 		} else {
-			CommandUtil.sendSafeCommandReply("Hmmm, seems like no one deleted any messages yet...", event);
+			CommandUtil.sendSafeReply("Hmmm, seems like no one deleted any messages yet...", event);
 		}
 	}
 

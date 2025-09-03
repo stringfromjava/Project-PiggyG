@@ -1,6 +1,6 @@
 package net.stringfromjava.projectpiggyg.util.app;
 
-import net.stringfromjava.projectpiggyg.data.Constants;
+import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.util.data.FileUtil;
 import net.stringfromjava.projectpiggyg.util.data.PathUtil;
 import org.jetbrains.annotations.Nullable;

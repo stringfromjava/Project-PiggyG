@@ -1,7 +1,7 @@
 package net.stringfromjava.projectpiggyg.util.data;
 
 import net.dv8tion.jda.api.entities.Message;
-import net.stringfromjava.projectpiggyg.data.Constants;
+import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.util.app.LogType;
 import net.stringfromjava.projectpiggyg.util.app.LoggerUtil;
 import org.jetbrains.annotations.NotNull;
@@ -224,7 +224,7 @@ public final class FileUtil {
 	 *
 	 * @param attachment            The attachment to convert.
 	 * @param path                  The path that the converted file will be stored in.
-	 * @param logNonExistentWarning Should PiggyG log a warning when the path specified doesn't exist?
+	 * @param logNonExistentWarning Should PiggyG log a warning when the specified path doesn't exist?
 	 * @return The attachment as a {@link java.io.File} object.
 	 */
 	@Nullable

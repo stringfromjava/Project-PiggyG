@@ -18,23 +18,6 @@ import java.time.OffsetDateTime;
 public final class JsonUtil {
 
 	/**
-	 * Simply builds a string together without having to
-	 * concatenate everything with the addition ({@code +}) operator.
-	 *
-	 * @param strings All strings to be put together.
-	 * @return A newly constructed string.
-	 */
-	@Deprecated
-	@NotNull
-	public static String buildString(String... strings) {
-		StringBuilder sb = new StringBuilder();
-		for (String s : strings) {
-			sb.append(s);
-		}
-		return sb.toString();
-	}
-
-	/**
 	 * Retrieves a field from a {@link JSONObject} and casts it to the specified type.
 	 * <p>
 	 * If the key does not exist or the value cannot be cast to the specified type,

@@ -12,7 +12,6 @@ import net.stringfromjava.projectpiggyg.data.command.CommandOptionData;
 import net.stringfromjava.projectpiggyg.util.app.AppUtil;
 import net.stringfromjava.projectpiggyg.util.app.LogType;
 import net.stringfromjava.projectpiggyg.util.app.LoggerUtil;
-import net.stringfromjava.projectpiggyg.util.data.JsonUtil;
 import net.stringfromjava.projectpiggyg.util.data.FileUtil;
 import net.stringfromjava.projectpiggyg.util.data.PathUtil;
 import net.stringfromjava.projectpiggyg.util.discord.CommandUtil;
@@ -131,7 +130,7 @@ public abstract class CommandListener extends ListenerAdapter {
 		}
 
 		if (!Initialize.initialized) {
-			CommandUtil.sendSafeCommandReply(
+			CommandUtil.sendSafeReply(
 					"Hold your damn horses pigga, I'm not done setting up yet! :angry:",
 					event
 			);
@@ -167,7 +166,7 @@ public abstract class CommandListener extends ListenerAdapter {
 
 		// Ensure check safety of running this command inside a guild
 		if (guild == null && isGuildCommand) {
-			CommandUtil.sendSafeCommandReply(
+			CommandUtil.sendSafeReply(
 					"Pigga you can't use this command in our fucking DMs...",
 					event,
 					(tempFile != null) ? List.of(FileUpload.fromData(tempFile)) : List.of()
@@ -199,19 +198,19 @@ public abstract class CommandListener extends ListenerAdapter {
 				Member self = guild.getSelfMember();
 				Role highestBotRole = self.getRoles().isEmpty() ? null : self.getRoles().getFirst();
 				if (highestBotRole == null) {
-					CommandUtil.sendSafeCommandReply(
+					CommandUtil.sendSafeReply(
 							"Pigga...\nDid you really remove all my roles? :rage:",
 							event
 					);
 					return;
 				}
 				int maxPosition = guild.getRoles().stream() // Get the highest position of all roles in the guild
-						.filter(role -> !role.isManaged()) // ignore integration-managed roles
+						.filter(role -> !role.isManaged()) // Ignore integration-managed roles
 						.mapToInt(Role::getPosition)
 						.max()
 						.orElse(-1);
 				if (!(highestBotRole.getPosition() >= maxPosition)) {
-					CommandUtil.sendSafeCommandReply(
+					CommandUtil.sendSafeReply(
 							"Hey bruv, you need to put my role to be the highest in order for me to function correctly!",
 							event
 					);
@@ -219,10 +218,10 @@ public abstract class CommandListener extends ListenerAdapter {
 				}
 			}
 
-			// Check if the required conditional
+			// Check if the required conditional is enabled
 			boolean isEnabled = requiredConditional != null && (requiredConditional.isEmpty() || !AppUtil.conditionalEnabled(requiredConditional));
 			if (isEnabled) {
-				CommandUtil.sendSafeCommandReply("Sorry bruv, but the developer hosting me disabled this command... :unamused:", event);
+				CommandUtil.sendSafeReply("Sorry bruv, but the developer hosting me disabled this command... :unamused:", event);
 				return;
 			}
 
@@ -240,14 +239,14 @@ public abstract class CommandListener extends ListenerAdapter {
 					)
 			);
 			// Error message for the log file and the reply
-			String errorMsg = JsonUtil.buildString(
-					"# Sorry gang, but one of my command's event listeners (unfortunately) had an error. :sob:\n",
-					"\t__Please report this error (and the log file) to my official repository.__\n",
-					"\t**[OFFICIAL GITHUB REPO]:** https://github.com/korithekoder/Project-PiggyG\n",
-					STR."\t**[COMMAND CLASS NAME]:** *\{element.getClassName()}*\n",
-					STR."\t**[LINE]:** *\{element.getLineNumber()}*\n",
-					STR."\t**[ERROR MESSAGE]:** *\{e.getMessage()}*"
-			);
+			String errorMsg = STR."""
+					# Sorry gang, but one of my command's event listeners (unfortunately) had an error. :sob:
+					\t__Please report this error (and the log file) to my official repository.__
+					\t**[OFFICIAL GITHUB REPO]:** https://github.com/stringfromjava/Project-PiggyG
+					\t**[COMMAND CLASS NAME]:** *\{element.getClassName()}*
+					\t**[LINE]:** *\{element.getLineNumber()}*
+					\t**[ERROR MESSAGE]:** *\{e.getMessage()}*
+					""";
 
 			// Log all info
 			LoggerUtil.log(errorMsg, LogType.ERROR, false);

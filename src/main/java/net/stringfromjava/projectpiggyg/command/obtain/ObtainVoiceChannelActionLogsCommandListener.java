@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.stringfromjava.projectpiggyg.command.LogObtainerCommandListener;
-import net.stringfromjava.projectpiggyg.data.Constants;
+import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.data.command.CommandOptionData;
 import net.stringfromjava.projectpiggyg.util.data.JsonUtil;
 import net.stringfromjava.projectpiggyg.util.data.FileUtil;
@@ -113,13 +113,13 @@ public class ObtainVoiceChannelActionLogsCommandListener extends LogObtainerComm
 		File logsFile = generateLogFile(filteredLogs, "voice-action-logs");
 
 		if (logsFile != null && !filteredLogs.isEmpty()) {
-			CommandUtil.sendSafeCommandReply(
+			CommandUtil.sendSafeReply(
 					null,
 					event,
 					List.of(FileUpload.fromData(logsFile))
 			);
 		} else {
-			CommandUtil.sendSafeCommandReply(
+			CommandUtil.sendSafeReply(
 					"Sorry bro, but there ain't no one who muted/deafened anyone yet...",
 					event
 			);

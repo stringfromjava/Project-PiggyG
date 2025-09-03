@@ -13,14 +13,13 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.stringfromjava.projectpiggyg.command.misc.HelpCommandListener;
 import net.stringfromjava.projectpiggyg.command.obtain.*;
 import net.stringfromjava.projectpiggyg.command.stupid.TrollCommandListener;
-import net.stringfromjava.projectpiggyg.data.Constants;
+import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.event.guild.JoinLeaveGuildEventListener;
 import net.stringfromjava.projectpiggyg.event.guild.MessageCacheGuildEventListener;
 import net.stringfromjava.projectpiggyg.event.guild.VoiceChannelGuildEventListener;
 import net.stringfromjava.projectpiggyg.util.app.AppUtil;
 import net.stringfromjava.projectpiggyg.util.app.LogType;
 import net.stringfromjava.projectpiggyg.util.app.LoggerUtil;
-import net.stringfromjava.projectpiggyg.util.data.JsonUtil;
 import net.stringfromjava.projectpiggyg.util.data.FileUtil;
 import net.stringfromjava.projectpiggyg.util.data.PathUtil;
 import net.stringfromjava.projectpiggyg.util.discord.GuildUtil;
@@ -192,11 +191,12 @@ public final class Initialize {
 		if (missingGuildFoldersFound == 0) {
 			LoggerUtil.log(STR."No missing guild folders were detected!", LogType.INFO, false);
 		} else {
-			LoggerUtil.log(JsonUtil.buildString(
-					"Created missing folders for ",
-					STR."\{missingGuildFoldersFound} guild",
-					STR."\{(missingGuildFoldersFound != 1) ? "s" : ""}."
-			), LogType.INFO, false, true);
+			LoggerUtil.log(
+					STR."Created missing folders for \{missingGuildFoldersFound} guild\{(missingGuildFoldersFound != 1) ? "s" : "\""}",
+					LogType.INFO,
+					false,
+					true
+			);
 		}
 
 		displaySeparator();
