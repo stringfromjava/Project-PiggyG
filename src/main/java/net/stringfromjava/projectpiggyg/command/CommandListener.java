@@ -129,6 +129,7 @@ public abstract class CommandListener extends ListenerAdapter {
 			return;
 		}
 
+		System.out.println(STR."Intialized: \{Initialize.initialized}");
 		if (!Initialize.initialized) {
 			CommandUtil.sendSafeReply(
 					"Hold your damn horses pigga, I'm not done setting up yet! :angry:",
@@ -173,6 +174,7 @@ public abstract class CommandListener extends ListenerAdapter {
 			);
 			return;
 		}
+		System.out.println("Aint no way");
 
 		//
  		// Add your checks before running a command here!

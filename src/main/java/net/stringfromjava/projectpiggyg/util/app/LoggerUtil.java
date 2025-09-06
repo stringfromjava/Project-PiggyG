@@ -3,6 +3,7 @@ package net.stringfromjava.projectpiggyg.util.app;
 import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.util.data.FileUtil;
 import net.stringfromjava.projectpiggyg.util.data.PathUtil;
+import net.stringfromjava.projectpiggyg.util.sys.RuntimeUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -130,25 +131,25 @@ public final class LoggerUtil {
 	private static String constructLog(String info, LogType type, boolean includeDots, boolean emphasis, boolean isFileLog) {
 		StringBuilder log = new StringBuilder();
 		String[] logTimes = getFormattedLogTimes();
-		log.append(!isFileLog ? getLogColor(type, emphasis) : "");
+		log.append(!isFileLog && RuntimeUtil.ansiCodesAllowed() ? getLogColor(type, emphasis) : "");
 		log.append(STR."\{logTimes[0]} ");
 		log.append("[PIGGYG] ");
 		log.append(STR."[\{type}] ");
 		log.append(info);
 		log.append(includeDots ? "..." : "");
-		log.append(!isFileLog ? Constants.Debug.CONSOLE_TEXT_RESET : "");
+		log.append(!isFileLog && RuntimeUtil.ansiCodesAllowed() ? Constants.Ansi.CONSOLE_TEXT_RESET : "");
 		return log.toString();
 	}
 
 	private static String getLogColor(LogType type, boolean emphasis) {
-		String toReturn = Constants.Debug.CONSOLE_TEXT_BOLD;
+		String toReturn = Constants.Ansi.CONSOLE_TEXT_BOLD;
 		if (emphasis) {
-			toReturn += Constants.Debug.CONSOLE_TEXT_UNDERLINE;
+			toReturn += Constants.Ansi.CONSOLE_TEXT_UNDERLINE;
 		}
 		switch (type) {
-			case INFO -> toReturn += Constants.Debug.CONSOLE_TEXT_PINK;
-			case WARN -> toReturn += Constants.Debug.CONSOLE_TEXT_YELLOW;
-			case ERROR -> toReturn += Constants.Debug.CONSOLE_TEXT_RED;
+			case INFO -> toReturn += Constants.Ansi.CONSOLE_TEXT_PINK;
+			case WARN -> toReturn += Constants.Ansi.CONSOLE_TEXT_YELLOW;
+			case ERROR -> toReturn += Constants.Ansi.CONSOLE_TEXT_RED;
 		}
 		return toReturn;
 	}

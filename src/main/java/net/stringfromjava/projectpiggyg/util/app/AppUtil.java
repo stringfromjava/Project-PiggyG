@@ -1,6 +1,6 @@
 package net.stringfromjava.projectpiggyg.util.app;
 
-import net.stringfromjava.projectpiggyg.Initialize;
+import net.stringfromjava.projectpiggyg.util.sys.RuntimeUtil;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -20,13 +20,7 @@ public final class AppUtil {
 	public static void configure() {
 		// Load the config file
 		configProperties = new Properties();
-		try (InputStream in = AppUtil.class.getResourceAsStream("/config.properties")) {
-			configProperties.load(in);
-		} catch (Exception e) {
-			String errorMsg = "'config.properties' file was not found. It is required in order to run PiggyG, did you delete it?";
-			LoggerUtil.error(errorMsg);
-			System.exit(0);
-		}
+		attemptPropertiesLoad(configProperties, "/config.properties");
 		// Load and configure all conditionals
 		conditionals = new ArrayList<>() {
 			{
@@ -46,8 +40,8 @@ public final class AppUtil {
 	 * it will return {@code DEV} instead.
 	 */
 	public static String getAppVersion() {
-		String version = Initialize.class.getPackage().getImplementationVersion();
-		if (version == null) {
+		String version = AppUtil.class.getPackage().getImplementationVersion();
+		if (!RuntimeUtil.isRunningFromJar() || version == null) {
 			// Fallback if not running from a packaged .jar, usually this gets
 			// returned instead if PiggyG is running in an IDE
 			version = "DEV";
@@ -63,6 +57,19 @@ public final class AppUtil {
 	 */
 	public static boolean conditionalEnabled(String id) {
 		return conditionals.contains(id);
+	}
+
+	private static void attemptPropertiesLoad(Properties properties, String resourcePath) {
+		try (InputStream in = AppUtil.class.getResourceAsStream(resourcePath)) {
+			properties.load(in);
+		} catch (Exception e) {
+			String errorMsg = String.format(
+					"\"%s\" file was not found. It is required in order to run PiggyG, did you delete it?",
+					resourcePath
+			);
+			LoggerUtil.error(errorMsg);
+			System.exit(0);
+		}
 	}
 
 	private AppUtil() {

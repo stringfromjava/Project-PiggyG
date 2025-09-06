@@ -18,6 +18,6 @@ public class Main {
 	 *             the command line.
 	 */
 	public static void main(String[] args) {
-		Initialize.init();
+		Initialize.init(args);
 	}
 }

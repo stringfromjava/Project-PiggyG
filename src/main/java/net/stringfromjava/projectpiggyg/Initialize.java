@@ -25,15 +25,15 @@ import net.stringfromjava.projectpiggyg.util.data.PathUtil;
 import net.stringfromjava.projectpiggyg.util.discord.GuildUtil;
 import net.stringfromjava.projectpiggyg.util.discord.CommandUtil;
 import net.stringfromjava.projectpiggyg.util.git.GitUtil;
+import net.stringfromjava.projectpiggyg.util.sys.RunEnvironment;
+import net.stringfromjava.projectpiggyg.util.sys.RuntimeUtil;
 import net.stringfromjava.projectpiggyg.util.sys.SystemUtil;
+import org.fusesource.jansi.AnsiConsole;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * The initialization of PiggyG. This is where
@@ -63,10 +63,24 @@ public final class Initialize {
 	 * <p>
 	 * <u><b><i>IMPORTANT:</i></b> This should be only called <b>ONCE</b>.</u>
 	 */
-	public static void init() {
+	public static void init(String[] args) {
 		client.addEventListener(new ListenerAdapter() {
 			@Override
 			public void onReady(@NotNull ReadyEvent event) {
+				// Pre-configurations from the command line arguments
+				// passed down to PiggyG
+				for (String arg : args) {
+					if (Constants.Runtime.COMMAND_ARGUMENT_NO_ANSI_COLOR.equals(arg)) {
+						RuntimeUtil.allowAnsiCodes(false);
+					}
+				}
+
+				// Configure Jansi if it isn't running in an IDE, since they
+				// already support ANSI codes natively
+				if (RuntimeUtil.ansiCodesAllowed() && RuntimeUtil.isRunningFromJar()) {
+					AnsiConsole.systemInstall();
+				}
+
 				LoggerUtil.log("### PIGGYG 2.0 ###", LogType.INFO, false, false, false);
 				LoggerUtil.log("Initializing setup process", LogType.INFO, true, false, false);
 				displaySeparator(false, false);
@@ -75,6 +89,7 @@ public final class Initialize {
 				// ==========================================
 				setupProjectFilesAndFolders();
 				configureUtilities();
+				configureHooks();
 				logGitInfo();
 				logSystemInfo();
 				logVersionInfo();
@@ -104,7 +119,31 @@ public final class Initialize {
 		AppUtil.configure();
 	}
 
+	private static void configureHooks() {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			displaySeparator();
+			LoggerUtil.log("### SHUTTING DOWN PIGGYG ###", LogType.INFO, false);
+			LoggerUtil.log("Shutting down JDA");
+			if (client != null) {
+				client.shutdown();
+			}
+			LoggerUtil.log("Shutting down Jansi");
+			if (AnsiConsole.isInstalled()) {
+				AnsiConsole.systemUninstall();
+			}
+			LoggerUtil.log(Constants.Runtime.SESSION_TERMINATED_MESSAGE, LogType.INFO, false);
+			if (RuntimeUtil.isRunningFromJar()) {
+				new Scanner(System.in).nextLine();
+			}
+		}));
+	}
+
 	private static void logGitInfo() {
+		// Only log Git info if running in a development environment
+		if (RuntimeUtil.isRunningFromJar()) {
+			return;
+		}
+
 		GitUtil.RepoInfo repoInfo = GitUtil.getRepoInfo();
 		// Log current commit
 		if (repoInfo.commit() != null) {
@@ -133,6 +172,7 @@ public final class Initialize {
 		LoggerUtil.log(STR."Current Platform: \{SystemUtil.getPlatformType()}", LogType.INFO, false);
 		LoggerUtil.log(STR."Current Platform Version: \{System.getProperty("os.version")}", LogType.INFO, false);
 		LoggerUtil.log(STR."App Data Directory: \{Constants.System.APP_DATA_DIRECTORY}", LogType.INFO, false);
+		LoggerUtil.log(STR."Runtime Environment: \{RuntimeUtil.detectEnvironment()}", LogType.INFO, false);
 		displaySeparator();
 	}
 

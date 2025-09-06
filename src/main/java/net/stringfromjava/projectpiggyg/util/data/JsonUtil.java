@@ -112,6 +112,7 @@ public final class JsonUtil {
 						.put("contents", message.getContentRaw())
 						.put("attachments", attachmentsArray)
 						.put("id", message.getId()))
+				.put("edit-history", new JSONArray())
 				.put("author", createUserInfoJson(author))
 				.put("time", timeSent);
 	}

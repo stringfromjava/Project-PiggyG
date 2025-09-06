@@ -9,8 +9,7 @@ import net.stringfromjava.projectpiggyg.util.sys.SystemUtil;
 import java.util.ArrayList;
 
 /**
- * Class containing constants used throughout PiggyG.
- * This class is final and cannot be instantiated.
+ * Class containing constant, unchangeable values used throughout PiggyG.
  */
 public final class Constants {
 
@@ -20,7 +19,7 @@ public final class Constants {
 	public static final class Discord {
 
 		/**
-		 * The "password" for the bot to connect to the Discord API.
+		 * The "password" for PiggyG to connect to the Discord API.
 		 */
 		public static final String PIGGYG_TOKEN = Dotenv.load().get("TOKEN");
 
@@ -105,6 +104,12 @@ public final class Constants {
 
 		/**
 		 * The name of the folder that contains all the
+		 * cached messages for each channel inside each guild.
+		 */
+		public static final String GUILD_BLOB_CACHE_CHANNELS_FOLDER_NAME = "channels";
+
+		/**
+		 * The name of the folder that contains all the
 		 * cached message attachments inside each guild.
 		 */
 		public static final String GUILD_BLOB_CACHE_MESSAGES_ATTACHMENT_FOLDER_NAME = "attachments";
@@ -142,6 +147,35 @@ public final class Constants {
 		}
 	}
 
+	/**
+	 * Constants that have to do with the runtime of PiggyG.
+	 * These are typically command line arguments.
+	 */
+	public static final class Runtime {
+
+		/**
+		 * The command line argument to disable ANSI colors in the console.
+		 * This can only be used if PiggyG is being run through the command line
+		 * (typically in a {@code .jar} file).
+		 */
+		public static final String COMMAND_ARGUMENT_NO_ANSI_COLOR = "--no-ansi-color";
+
+		/**
+		 * The message that gets displayed when PiggyG is terminated.
+		 */
+		public static final String SESSION_TERMINATED_MESSAGE = """
+				PiggyG has been terminated. Thank you for using PiggyG.
+				
+				If you ever want to contribute to this project, then please
+				consider visiting the official GitHub repository.
+				
+				[GitHub Repository] -> https://github.com/stringfromjava/Project-PiggyG
+				""";
+
+		private Runtime() {
+		}
+	}
+
 	public static final class Conditionals {
 
 		/**
@@ -158,10 +192,10 @@ public final class Constants {
 	}
 
 	/**
-	 * Constants for things specifically relating to either
-	 * debugging PiggyG or the IDE it is running in (if it is, of course).
+	 * Constants for holding ANSI codes for coloring text in the console.
+	 * These codes can be used to make text bold, underlined, and more.
 	 */
-	public static final class Debug {
+	public static final class Ansi {
 
 		/**
 		 * ANSI code for resetting the color of text in the console.
@@ -223,7 +257,7 @@ public final class Constants {
 		 */
 		public static final String CONSOLE_TEXT_UNDERLINE = "\u001B[4m";
 
-		private Debug() {
+		private Ansi() {
 		}
 	}
 

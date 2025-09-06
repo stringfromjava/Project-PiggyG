@@ -18,7 +18,6 @@ import net.stringfromjava.projectpiggyg.util.data.FileUtil;
 import net.stringfromjava.projectpiggyg.util.data.PathUtil;
 import net.stringfromjava.projectpiggyg.util.discord.CommandUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -55,6 +54,16 @@ public class ObtainDeletedMessagesCommandListener extends LogObtainerCommandList
 		client = event.getJDA();
 		int amount = 0;
 		channel = event.getOption("channel").getAsChannel();
+
+		// Make sure it's a valid text channel first before we
+		// move on and create any other variables or files
+		if (!(channel instanceof GuildMessageChannel)) {
+			CommandUtil.sendSafeReply(
+					"Brother, you need to put in a channel where you can __*SEND MESSAGES*__, not whatever bullshit you tried to feed me :sob::pray:",
+					event
+			);
+		}
+
 		OptionMapping amountOM = event.getOption("amount");
 		Guild guild = event.getGuild();
 		File deletedMessageIdsFile = FileUtil.ensureFileExists(
@@ -64,24 +73,17 @@ public class ObtainDeletedMessagesCommandListener extends LogObtainerCommandList
 				),
 				"[]"
 		);
-		File cachedMessagesFile = FileUtil.ensureFileExists(
+		File messageJsonFile = FileUtil.ensureFileExists(
 				PathUtil.fromGuildBlobCache(
 						guild.getId(),
+						Constants.System.GUILD_BLOB_CACHE_CHANNELS_FOLDER_NAME,
 						Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME,
 						STR."\{channel.getId()}.json"
 				),
 				"[]"
 		);
-		JSONArray cachedMessages = new JSONArray(FileUtil.getFileData(cachedMessagesFile));
 		JSONArray deletedMessageIds = new JSONArray(FileUtil.getFileData(deletedMessageIdsFile));
 		JSONArray obtained = new JSONArray();
-
-		if (!(channel instanceof GuildMessageChannel)) {
-			CommandUtil.sendSafeReply(
-					"Brother, you need to put in a channel where you can __*SEND MESSAGES*__, not whatever bullshit you tried to feed me :sob::pray:",
-					event
-			);
-		}
 
 		if (amountOM != null) {
 			amount = amountOM.getAsInt();
@@ -96,6 +98,22 @@ public class ObtainDeletedMessagesCommandListener extends LogObtainerCommandList
 					event
 			);
 			return;
+		}
+
+		for (int i = deletedMessageIds.length() - 1; i >= 0 && obtained.length() < amount; i--) {
+			String currentId = deletedMessageIds.getString(i);
+			JSONArray messagesInChannel = new JSONArray(FileUtil.getFileData(messageJsonFile));
+			for (Object messageObj : messagesInChannel.toList()) {
+				if (!(messageObj instanceof JSONObject message)) {
+					continue;
+				}
+				String messageId = JsonUtil.getJsonField(message, "message", new JSONObject())
+						.optString("id", "Unknown");
+				if (messageId.equals(currentId)) {
+					obtained.put(message);
+					break;
+				}
+			}
 		}
 
 		File toSend = generateLogFile(obtained, "deleted-messages");
@@ -151,21 +169,5 @@ public class ObtainDeletedMessagesCommandListener extends LogObtainerCommandList
 		sb.append("-------------------------------------------------------------\n");
 
 		return sb.toString();
-	}
-
-	@Nullable
-	private JSONObject getCachedMessageById(JSONArray logs, String msgId) {
-		for (Object log : logs) {
-			if (!(log instanceof JSONObject l)) {
-				continue;
-			}
-
-			JSONObject msg = JsonUtil.getJsonField(l, "message", new JSONObject());
-			String id = JsonUtil.getJsonField(msg, "id", "");
-			if (msgId.equals(id)) {
-				return l;
-			}
-		}
-		return null;
 	}
 }

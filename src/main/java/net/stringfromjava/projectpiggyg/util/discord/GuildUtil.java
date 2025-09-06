@@ -37,18 +37,12 @@ public final class GuildUtil {
 		String newLogPath = PathUtil.fromGuildFolder(guildId, Constants.System.GUILD_LOG_FOLDER_NAME);
 		String newTAPath = PathUtil.fromGuildFolder(guildId, Constants.System.GUILD_TROLL_ATTACHMENT_FOLDER_NAME);
 		String newBlobCachePath = PathUtil.fromGuildFolder(guildId, Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME);
-		String newBlobCacheMessagesPath = PathUtil.fromGuildFolder(
-				guildId,
-				Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME,
-				Constants.System.GUILD_BLOB_CACHE_MESSAGES_ATTACHMENT_FOLDER_NAME
-		);
 
 		// Create directories
 		PathUtil.createPath(newGuildPath);
 		PathUtil.createPath(newLogPath);
 		PathUtil.createPath(newTAPath);
 		PathUtil.createPath(newBlobCachePath);
-		PathUtil.createPath(newBlobCacheMessagesPath);
 		// Create files
 		File configFile = FileUtil.createFile(Constants.System.GUILD_CONFIG_FILE_NAME, newGuildPath);
 		File trollLogsFile = FileUtil.createFile(Constants.System.TROLL_LOG_FILE_NAME, newLogPath);
@@ -127,44 +121,31 @@ public final class GuildUtil {
 			if (!(channel instanceof GuildMessageChannel messageChannel)) {
 				continue;
 			}
-			File channelJsonFile = FileUtil.ensureFileExists(
-					PathUtil.fromGuildBlobCache(guild.getId(), "messages", STR."\{messageChannel.getId()}.json"),
-					"[]",
+			String channelPath = PathUtil.ensurePathExists(
+					PathUtil.fromGuildBlobCache(
+							guild.getId(),
+							Constants.System.GUILD_BLOB_CACHE_CHANNELS_FOLDER_NAME,
+							messageChannel.getId()
+					),
 					false
 			);
-			JSONArray messages = new JSONArray(FileUtil.getFileData(channelJsonFile));
-
 			// Loop through the message history of the current channel
 			for (Message message : GuildUtil.getFullMessageHistory(messageChannel)) {
-				JSONObject messageInfo = JsonUtil.createMessageJson(message);
-				boolean containsMessage = false;
-				// Make sure the message isn't already cached
-				for (Object log : messages) {
-					if (!(log instanceof JSONObject l)) {
-						continue;
-					}
-
-					JSONObject msg = JsonUtil.getJsonField(l, "message", new JSONObject());
-					String msgId = JsonUtil.getJsonField(msg, "id", "");
-
-					if (msgId.equals(messageInfo.getJSONObject("message").get("id"))) {
-						containsMessage = true;
-						break;
-					}
-				}
-				if (!containsMessage) {
-					messages.put(messageInfo);
-				}
+				String messagePath = PathUtil.ensurePathExists(
+						PathUtil.constructPath(channelPath, "messages", message.getId()),
+						false
+				);
+				// Create the .json file for the basic data of the message
+				FileUtil.ensureFileExists(
+						PathUtil.constructPath(messagePath, "message.json"),
+						JsonUtil.createMessageJson(message).toString(2),
+						false
+				);
 				// Store all the attachments that are contained in a message
 				for (Message.Attachment attachment : message.getAttachments()) {
-					String path = PathUtil.ensurePathExists(
-							PathUtil.fromGuildBlobCache(guild.getId(), "messages", "attachments", message.getId())
-					);
-					FileUtil.convertAttachmentToFile(attachment, path, false);
+					FileUtil.convertAttachmentToFile(attachment, messagePath, false);
 				}
 			}
-
-			FileUtil.writeToFile(channelJsonFile, messages.toString(2));
 		}
 	}
 
