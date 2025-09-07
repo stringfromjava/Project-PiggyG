@@ -199,7 +199,7 @@ public final class FileUtil {
 						false
 				);
 			}
-			createFile(file.getName(), PathUtil.ensurePathExists(PathUtil.getFilePath(file)));
+			createFile(file.getName(), PathUtil.ensurePathExists(file.getParent()));
 			writeToFile(file, contents);
 		}
 		return file;

@@ -7,7 +7,6 @@ import net.stringfromjava.projectpiggyg.util.sys.PlatformType;
 import net.stringfromjava.projectpiggyg.util.sys.SystemUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 
@@ -119,13 +118,8 @@ public final class PathUtil {
 	 * @return The path to the guild folder.
 	 */
 	public static String fromGuildFolder(String guildId, String... toAppend) {
-		StringBuilder toReturn = new StringBuilder(constructPath(Constants.System.APP_DATA_DIRECTORY, "guilds", guildId));
-		for (String path : toAppend) {
-			toReturn.append(path);
-			toReturn.append(Constants.System.OS_PATH_SEPERATOR);
-		}
-		String s = toReturn.toString();
-		return s.substring(0, s.length() - 1);
+		String[] base = {Constants.System.APP_DATA_DIRECTORY, "guilds", guildId};
+		return constructPath(BataUtil.combineArrays(base, toAppend));
 	}
 
 	/**
@@ -137,18 +131,8 @@ public final class PathUtil {
 	 * the path provided).
 	 */
 	public static String fromGuildBlobCache(String guildId, String... toAppend) {
-		StringBuilder toReturn = new StringBuilder(constructPath(
-				Constants.System.APP_DATA_DIRECTORY,
-				"guilds",
-				guildId,
-				Constants.System.GUILD_BLOB_CACHE_FOLDER_NAME
-		));
-		for (String path : toAppend) {
-			toReturn.append(path);
-			toReturn.append(Constants.System.OS_PATH_SEPERATOR);
-		}
-		String s = toReturn.toString();
-		return s.substring(0, s.length() - 1);
+		String[] base = {Constants.System.APP_DATA_DIRECTORY, "guilds", guildId, Constants.System.GUILD_BLOB_CACHE_FOLDER_NAME};
+		return constructPath(BataUtil.combineArrays(base, toAppend));
 	}
 
 	/**
@@ -158,24 +142,14 @@ public final class PathUtil {
 	 * @return The path to the logs folder in a guild folder.
 	 */
 	public static String fromGuildLogs(String guildId, String... toAppend) {
-		StringBuilder toReturn = new StringBuilder(constructPath(
-				Constants.System.APP_DATA_DIRECTORY,
-				"guilds",
-				guildId,
-				Constants.System.GUILD_LOG_FOLDER_NAME
-		));
-		for (String path : toAppend) {
-			toReturn.append(path);
-			toReturn.append(Constants.System.OS_PATH_SEPERATOR);
-		}
-		String s = toReturn.toString();
-		return s.substring(0, s.length() - 1);
+		String[] base = {Constants.System.APP_DATA_DIRECTORY, "guilds", guildId, Constants.System.GUILD_LOG_FOLDER_NAME};
+		return constructPath(BataUtil.combineArrays(base, toAppend));
 	}
 
 	/**
-	 * Gets the full pathway to the project folder for PiggyG.
+	 * Gets the full pathway to the app data folder for the current user.
 	 *
-	 * @return The directory to PiggyG's project folder.
+	 * @return The directory to the user's app data folder.
 	 */
 	public static String getUserHomePath() {
 		String userHome = System.getProperty("user.home");
@@ -202,30 +176,20 @@ public final class PathUtil {
 	 * @return The path with the appended strings with it.
 	 */
 	public static String ofAppData(String... toAppend) {
-		StringBuilder toReturn = new StringBuilder(Constants.System.APP_DATA_DIRECTORY);
-		for (String path : toAppend) {
-			toReturn.append(Constants.System.OS_PATH_SEPERATOR);
-			toReturn.append(path);
-		}
-		return toReturn.toString();
+		String[] base = {Constants.System.APP_DATA_DIRECTORY};
+		return constructPath(BataUtil.combineArrays(base, toAppend));
 	}
 
 	/**
 	 * Constructs a directory with ease using the current
 	 * OS's file slash character without having to do
-	 * {@code "folder" + Constants.OS_FILE_SLASH + "folder"} many times.
+	 * {@code "folder" + OS_FILE_SLASH + "folder"} many times.
 	 *
 	 * @param folders The different folder(s) to construct together.
-	 * @return A pathway with the different folder(s) passed down with the
-	 * correct OS file slash.
+	 * @return A pathway with the different folder(s).
 	 */
 	public static String constructPath(String... folders) {
-		StringBuilder path = new StringBuilder();
-		for (String folder : folders) {
-			path.append(folder);
-			path.append(Constants.System.OS_PATH_SEPERATOR);
-		}
-		return path.toString();
+		return String.join(String.valueOf(Constants.System.OS_PATH_SEPERATOR), folders);
 	}
 
 	/**
@@ -272,25 +236,6 @@ public final class PathUtil {
 	public static boolean doesPathExist(@NotNull String path) {
 		Path p = Path.of(path);
 		return (Files.exists(p) && Files.isDirectory(p));
-	}
-
-	/**
-	 * Gets the path to the file provided (without the
-	 * name of the file included).
-	 *
-	 * @param file The file object to get the path from.
-	 * @return The modified path.
-	 */
-	public static String getFilePath(File file) {
-		String path = file.getPath();
-		StringBuilder sb = new StringBuilder();
-		char ops = Constants.System.OS_PATH_SEPERATOR;
-		String[] brokenDownPath = path.split(STR."\{ops == '\\' ? "\\\\" : ops}");
-		for (int i = 0; i < brokenDownPath.length - 1; i++) {
-			sb.append(brokenDownPath[i]);
-			sb.append(ops);
-		}
-		return sb.toString().substring(0, sb.toString().length() - 1);
 	}
 
 	private PathUtil() {

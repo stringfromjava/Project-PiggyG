@@ -58,7 +58,7 @@ public final class Constants {
 	}
 
 	/**
-	 * Constants that have to do with the local system PiggyG is running on.
+	 * Constants that have to do with the curr local system PiggyG is running on.
 	 */
 	public static final class System {
 

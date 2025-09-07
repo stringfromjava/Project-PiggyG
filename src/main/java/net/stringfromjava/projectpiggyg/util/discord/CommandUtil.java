@@ -59,7 +59,7 @@ public final class CommandUtil {
 	 * @param event   The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} to send a reply with.
 	 */
 	public static void sendSafeReply(String message, SlashCommandInteractionEvent event) {
-		sendSafeReply(message, event, null, null, null);
+		sendSafeReply(message, event, null, false, null, null);
 	}
 
 	/**
@@ -70,7 +70,18 @@ public final class CommandUtil {
 	 * @param files   Optional files to send with the reply.
 	 */
 	public static void sendSafeReply(String message, SlashCommandInteractionEvent event, Collection<FileUpload> files) {
-		sendSafeReply(message, event, files, null, null);
+		sendSafeReply(message, event, files, false, null, null);
+	}
+
+	/**
+	 * A safe way to send a reply in a command without errors being raised.
+	 *
+	 * @param message The message to send.
+	 * @param event   The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} to send a reply with.
+	 * @param files   Optional files to send with the reply.
+	 */
+	public static void sendSafeReply(String message, SlashCommandInteractionEvent event, Collection<FileUpload> files, boolean ephemeral) {
+		sendSafeReply(message, event, files, ephemeral, null, null);
 	}
 
 	/**
@@ -81,8 +92,8 @@ public final class CommandUtil {
 	 * @param files     Optional files to send with the reply.
 	 * @param onSuccess Callback function to be triggered when the message was successfully sent.
 	 */
-	public static void sendSafeReply(String message, SlashCommandInteractionEvent event, Collection<FileUpload> files, Runnable onSuccess) {
-		sendSafeReply(message, event, files, onSuccess, null);
+	public static void sendSafeReply(String message, SlashCommandInteractionEvent event, Collection<FileUpload> files, boolean ephemeral, Runnable onSuccess) {
+		sendSafeReply(message, event, files, ephemeral, onSuccess, null);
 	}
 
 	/**
@@ -91,12 +102,15 @@ public final class CommandUtil {
 	 * @param message   The message to send.
 	 * @param event     The {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} to send a reply with.
 	 * @param files     Optional files to send with the reply.
+	 * @param ephemeral Should the reply be ephemeral (only visible to the user who triggered the command)?
 	 * @param onSuccess Callback function to be triggered when the message was successfully sent.
 	 * @param onFailure Callback function to be triggered when the message failed to send.
 	 */
-	public static void sendSafeReply(@Nullable String message, @NotNull SlashCommandInteractionEvent event, @Nullable Collection<FileUpload> files, @Nullable Runnable onSuccess, @Nullable Runnable onFailure) {
-		event.reply((message != null) ? message : "")
+	public static void sendSafeReply(@Nullable String message, @NotNull SlashCommandInteractionEvent event, @Nullable Collection<FileUpload> files, boolean ephemeral, @Nullable Runnable onSuccess, @Nullable Runnable onFailure) {
+		event.deferReply(ephemeral).queue();
+		event.getHook().sendMessage((message != null) ? message : "")
 				.addFiles((files != null) ? files : List.of())
+				.setEphemeral(ephemeral)
 				.submit()
 				.orTimeout(30, TimeUnit.SECONDS)
 				.whenComplete((msg, exception) -> {

@@ -36,13 +36,14 @@ public final class GuildUtil {
 		String newGuildPath = PathUtil.fromGuildFolder(guildId);
 		String newLogPath = PathUtil.fromGuildFolder(guildId, Constants.System.GUILD_LOG_FOLDER_NAME);
 		String newTAPath = PathUtil.fromGuildFolder(guildId, Constants.System.GUILD_TROLL_ATTACHMENT_FOLDER_NAME);
-		String newBlobCachePath = PathUtil.fromGuildFolder(guildId, Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME);
+		String newBlobCachePath = PathUtil.fromGuildFolder(guildId, Constants.System.GUILD_BLOB_CACHE_FOLDER_NAME);
 
 		// Create directories
 		PathUtil.createPath(newGuildPath);
 		PathUtil.createPath(newLogPath);
 		PathUtil.createPath(newTAPath);
 		PathUtil.createPath(newBlobCachePath);
+
 		// Create files
 		File configFile = FileUtil.createFile(Constants.System.GUILD_CONFIG_FILE_NAME, newGuildPath);
 		File trollLogsFile = FileUtil.createFile(Constants.System.TROLL_LOG_FILE_NAME, newLogPath);
@@ -106,14 +107,6 @@ public final class GuildUtil {
 
 		PathUtil.ensurePathExists(
 				PathUtil.fromGuildBlobCache(guild.getId())
-		);
-
-		PathUtil.ensurePathExists(
-				PathUtil.fromGuildBlobCache(
-						guild.getId(),
-						Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME,
-						Constants.System.GUILD_BLOB_CACHE_MESSAGES_ATTACHMENT_FOLDER_NAME
-				)
 		);
 
 		// Loop through all channels and store their messages

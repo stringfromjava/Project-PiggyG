@@ -25,7 +25,6 @@ import net.stringfromjava.projectpiggyg.util.data.PathUtil;
 import net.stringfromjava.projectpiggyg.util.discord.GuildUtil;
 import net.stringfromjava.projectpiggyg.util.discord.CommandUtil;
 import net.stringfromjava.projectpiggyg.util.git.GitUtil;
-import net.stringfromjava.projectpiggyg.util.sys.RunEnvironment;
 import net.stringfromjava.projectpiggyg.util.sys.RuntimeUtil;
 import net.stringfromjava.projectpiggyg.util.sys.SystemUtil;
 import org.fusesource.jansi.AnsiConsole;

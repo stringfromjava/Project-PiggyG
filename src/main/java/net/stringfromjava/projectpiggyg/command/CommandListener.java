@@ -129,7 +129,6 @@ public abstract class CommandListener extends ListenerAdapter {
 			return;
 		}
 
-		System.out.println(STR."Intialized: \{Initialize.initialized}");
 		if (!Initialize.initialized) {
 			CommandUtil.sendSafeReply(
 					"Hold your damn horses pigga, I'm not done setting up yet! :angry:",
@@ -138,46 +137,34 @@ public abstract class CommandListener extends ListenerAdapter {
 			return;
 		}
 
-		// Get the dumbass reaction image to send
-		// if the command being used is in DMs and
-		// is a guild-only command
 		Guild guild = event.getGuild();
-		InputStream input = getClass()
-				.getClassLoader()
-				.getResourceAsStream(PathUtil.constructPath("reactions", "non-guild-command.jpg"));
-		File tempFile = null;
-		try {
-			tempFile = File.createTempFile("non-guild-command", ".jpg");
-			if (input != null) {
-				Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			} else {
+
+		// Ensure check safety of running this command inside a guild
+		if (guild == null && isGuildCommand) {
+			// Get the dumbass reaction image to send
+			// if the command being used is in DMs and
+			// is a guild-only command
+			InputStream input = getClass()
+					.getClassLoader()
+					.getResourceAsStream(PathUtil.constructPath("reactions", "non-guild-command.jpg"));
+
+			if (input == null) {
 				LoggerUtil.log(
 						STR."Could not get reaction image for a non-guild command, did you delete it?",
 						LogType.ERROR,
 						false
 				);
 			}
-		} catch (IOException e) {
-			LoggerUtil.log(
-					STR."Could not get reaction image for a non-guild command, got this error: '\{e.getMessage()}'",
-					LogType.ERROR,
-					false
-			);
-		}
-
-		// Ensure check safety of running this command inside a guild
-		if (guild == null && isGuildCommand) {
 			CommandUtil.sendSafeReply(
 					"Pigga you can't use this command in our fucking DMs...",
 					event,
-					(tempFile != null) ? List.of(FileUpload.fromData(tempFile)) : List.of()
+					(input != null) ? List.of(FileUpload.fromData(input, "reaction.jpg")) : List.of()
 			);
 			return;
 		}
-		System.out.println("Aint no way");
 
 		//
- 		// Add your checks before running a command here!
+		// Add your checks before running a command here!
 		// ============================================================
 		try {
 			// Check if the guild's folder exists

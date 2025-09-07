@@ -13,6 +13,7 @@ import net.stringfromjava.projectpiggyg.data.command.CommandOptionData;
 import net.stringfromjava.projectpiggyg.util.data.JsonUtil;
 import net.stringfromjava.projectpiggyg.util.data.FileUtil;
 import net.stringfromjava.projectpiggyg.util.data.PathUtil;
+import net.stringfromjava.projectpiggyg.util.discord.CommandUtil;
 import net.stringfromjava.projectpiggyg.util.discord.UserUtil;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -50,12 +51,18 @@ public class TrollCommandListener extends CommandListener {
 		File attachmentAsFile = null;
 		OptionMapping attachmentOM = event.getOption("attachment");
 		FileUpload attachmentAsFileUpload;
-		Runnable onSuccess = () -> {
-			event.reply("'Ight gang, the troll was sent").setEphemeral(true).queue();
-		};
-		Runnable onFailure = () -> {
-			event.reply("Sorry bruv, but the troll didn't send... :pensive:").setEphemeral(true).queue();
-		};
+		Runnable onSuccess = () -> CommandUtil.sendSafeReply(
+				"'Ight gang, the troll was sent",
+				event,
+				null,
+				true
+		);
+		Runnable onFailure = () -> CommandUtil.sendSafeReply(
+				"Sorry bruv, but the troll didn't send... :pensive:",
+				event,
+				null,
+				true
+		);
 
 		// Prevent the user from sending a troll to a bot
 		if (receiver.isBot()) {
