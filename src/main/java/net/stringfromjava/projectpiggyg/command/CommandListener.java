@@ -81,6 +81,11 @@ public abstract class CommandListener extends ListenerAdapter {
 	protected Collection<CommandOptionData> options;
 
 	/**
+	 * Should the reply to the command be ephemeral (not visible to other users)?
+	 */
+	protected boolean ephemeralReply = false;
+
+	/**
 	 * @param name The name of {@code this} command.
 	 */
 	public CommandListener(String name) {
@@ -121,6 +126,10 @@ public abstract class CommandListener extends ListenerAdapter {
 		return requiredConditional;
 	}
 
+	public boolean isEphemeralReply() {
+		return ephemeralReply;
+	}
+
 	@Override
 	public final void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 		// If the triggered command's name doesn't
@@ -138,6 +147,7 @@ public abstract class CommandListener extends ListenerAdapter {
 		}
 
 		Guild guild = event.getGuild();
+		event.deferReply(ephemeralReply).queue();
 
 		// Ensure check safety of running this command inside a guild
 		if (guild == null && isGuildCommand) {

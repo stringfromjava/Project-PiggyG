@@ -107,7 +107,6 @@ public final class CommandUtil {
 	 * @param onFailure Callback function to be triggered when the message failed to send.
 	 */
 	public static void sendSafeReply(@Nullable String message, @NotNull SlashCommandInteractionEvent event, @Nullable Collection<FileUpload> files, boolean ephemeral, @Nullable Runnable onSuccess, @Nullable Runnable onFailure) {
-		event.deferReply(ephemeral).queue();
 		event.getHook().sendMessage((message != null) ? message : "")
 				.addFiles((files != null) ? files : List.of())
 				.setEphemeral(ephemeral)

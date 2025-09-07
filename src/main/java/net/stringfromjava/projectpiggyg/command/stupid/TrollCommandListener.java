@@ -40,6 +40,7 @@ public class TrollCommandListener extends CommandListener {
 				new CommandOptionData(OptionType.STRING, "message", "The message to send.", true),
 				new CommandOptionData(OptionType.ATTACHMENT, "attachment", "An optional attachment to send with your stupid message.", false)
 		);
+		ephemeralReply = true;
 	}
 
 	@Override
@@ -53,20 +54,19 @@ public class TrollCommandListener extends CommandListener {
 		FileUpload attachmentAsFileUpload;
 		Runnable onSuccess = () -> CommandUtil.sendSafeReply(
 				"'Ight gang, the troll was sent",
-				event,
-				null,
-				true
+				event
 		);
 		Runnable onFailure = () -> CommandUtil.sendSafeReply(
 				"Sorry bruv, but the troll didn't send... :pensive:",
-				event,
-				null,
-				true
+				event
 		);
 
 		// Prevent the user from sending a troll to a bot
 		if (receiver.isBot()) {
-			event.reply("Pigga you can't send trolls to bots dumbass :unamused:").setEphemeral(true).queue();
+			CommandUtil.sendSafeReply(
+					"Pigga you can't send trolls to bots dumbass :unamused:",
+					event
+			);
 			return;
 		}
 

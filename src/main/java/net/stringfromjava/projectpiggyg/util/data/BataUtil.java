@@ -6,6 +6,9 @@ package net.stringfromjava.projectpiggyg.util.data;
  * converting data types, and more. (Hence why it's called Bata).
  * <p>
  * I'm so funny trust.
+ * <p>
+ * "Do you also get handled by data util?"
+ * - ayylmao123xdd (Sunday, September 7, 2025 5:51 PM)
  */
 public final class BataUtil {
 
