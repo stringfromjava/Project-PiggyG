@@ -25,6 +25,18 @@ public final class UploadUtil {
 		return toReturn;
 	}
 
+	/**
+	 * Generates a unique snowflake ID similar to Discord's.
+	 * This ID is based on the current timestamp and some random bits.
+	 *
+	 * @return A unique snowflake ID as a {@code long}.
+	 */
+	public static long generateSnowflakeId() {
+		long timestamp = System.currentTimeMillis() - 1420070400000L; // Discord epoch (2015-01-01)
+		long randomBits = (long) (Math.random() * (1L << 22)); // 22 bits for randomness
+		return (timestamp << 22) | randomBits;
+	}
+
 	private UploadUtil() {
 	}
 }

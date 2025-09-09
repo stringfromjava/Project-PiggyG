@@ -60,7 +60,7 @@ public class ExampleCommandListener extends CommandListener {
 
 		// This is the recommended way to send a reply after the command is
 		// done being used and is ready to tell the user the output!
-		CommandUtil.sendSafeCommandReply(
+		CommandUtil.sendSafeReply(
 				// Mentions the said user (if it isn't null, of course)
 				// with whatever message the user using the command passed down
 				STR."\{(option2 != null) ? STR."<@\{option2.getId()}?" : ""}> \{option1}",

@@ -14,6 +14,7 @@ import net.stringfromjava.projectpiggyg.util.data.JsonUtil;
 import net.stringfromjava.projectpiggyg.util.data.FileUtil;
 import net.stringfromjava.projectpiggyg.util.data.PathUtil;
 import net.stringfromjava.projectpiggyg.util.discord.CommandUtil;
+import net.stringfromjava.projectpiggyg.util.discord.UploadUtil;
 import net.stringfromjava.projectpiggyg.util.discord.UserUtil;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -49,9 +50,9 @@ public class TrollCommandListener extends CommandListener {
 		User receiver = event.getOption("user").getAsUser();
 		String message = event.getOption("message").getAsString();
 		Message.Attachment attachment = null; // Reassign later since this option isn't required
-		File attachmentAsFile = null;
-		OptionMapping attachmentOM = event.getOption("attachment");
+		File attachmentAsFile;
 		FileUpload attachmentAsFileUpload;
+		OptionMapping attachmentOM = event.getOption("attachment");
 		Runnable onSuccess = () -> CommandUtil.sendSafeReply(
 				"'Ight gang, the troll was sent",
 				event
@@ -74,17 +75,16 @@ public class TrollCommandListener extends CommandListener {
 			attachment = attachmentOM.getAsAttachment();
 		}
 
-		if (attachment != null) {
-			String taPath = PathUtil.fromGuildFolder(guild.getId(), "trollattachments");
-			attachmentAsFile = FileUtil.convertAttachmentToFile(attachment, taPath);
-			if (attachmentAsFile != null) {
-				attachmentAsFileUpload = FileUpload.fromData(attachmentAsFile, attachment.getFileName());
-			} else {
-				attachmentAsFileUpload = null;
-			}
-		} else {
-			attachmentAsFileUpload = null;
-		}
+		String trollID = String.valueOf(UploadUtil.generateSnowflakeId());
+		String trollFolder = PathUtil.createPath(PathUtil.fromGuildBlobCache(guild.getId(),
+				Constants.System.GUILD_BLOB_CACHE_TROLLS_FOLDER_NAME,
+				trollID
+		));
+
+		attachmentAsFile = (attachment != null) ? FileUtil.convertAttachmentToFile(attachment, trollFolder) : null;
+		attachmentAsFileUpload = (attachmentAsFile != null)
+				? FileUpload.fromData(attachmentAsFile, attachment.getFileName())
+				: null;
 
 		// Send the troll message
 		UserUtil.sendDirectMessage(
@@ -95,11 +95,17 @@ public class TrollCommandListener extends CommandListener {
 				onFailure
 		);
 
+		// Add the new troll ID to the logs
 		File trollLogsFile = FileUtil.ensureFileExists(
 				PathUtil.fromGuildLogs(guild.getId(), Constants.System.TROLL_LOG_FILE_NAME),
 				"[]"
 		);
 		JSONArray trollLogs = new JSONArray(FileUtil.getFileData(trollLogsFile));
+		trollLogs.put(trollID);
+		FileUtil.writeToFile(trollLogsFile, trollLogs.toString(2));
+
+		// Create a new JSON file for the troll message
+		File messageFile = FileUtil.createFile(Constants.System.GUILD_BLOB_CACHE_TROLL_INFO_FILE_NAME, trollFolder);
 		JSONObject newLog = new JSONObject();
 		newLog.put("author", JsonUtil.createUserInfoJson(event.getUser()))
 				.put("receiver", JsonUtil.createUserInfoJson(receiver))
@@ -107,8 +113,8 @@ public class TrollCommandListener extends CommandListener {
 				.put("attachment", new JSONObject()
 						.put("name", (attachmentAsFile != null) ? attachmentAsFile.getName() : "null")
 						.put("url", (attachment != null) ? attachment.getUrl() : "null"))
-				.put("message", message);
-		trollLogs.put(newLog);
-		FileUtil.writeToFile(trollLogsFile, trollLogs.toString(2));
+				.put("message", message)
+				.put("id", trollID);
+		FileUtil.writeToFile(messageFile, newLog.toString(2));
 	}
 }

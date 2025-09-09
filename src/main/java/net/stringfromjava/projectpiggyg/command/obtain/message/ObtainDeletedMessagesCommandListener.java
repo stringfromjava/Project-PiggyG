@@ -1,4 +1,4 @@
-package net.stringfromjava.projectpiggyg.command.obtain;
+package net.stringfromjava.projectpiggyg.command.obtain.message;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -73,15 +74,6 @@ public class ObtainDeletedMessagesCommandListener extends LogObtainerCommandList
 				),
 				"[]"
 		);
-		File messageJsonFile = FileUtil.ensureFileExists(
-				PathUtil.fromGuildBlobCache(
-						guild.getId(),
-						Constants.System.GUILD_BLOB_CACHE_CHANNELS_FOLDER_NAME,
-						Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME,
-						STR."\{channel.getId()}.json"
-				),
-				"[]"
-		);
 		JSONArray deletedMessageIds = new JSONArray(FileUtil.getFileData(deletedMessageIdsFile));
 		JSONArray obtained = new JSONArray();
 
@@ -102,17 +94,25 @@ public class ObtainDeletedMessagesCommandListener extends LogObtainerCommandList
 
 		for (int i = deletedMessageIds.length() - 1; i >= 0 && obtained.length() < amount; i--) {
 			String currentId = deletedMessageIds.getString(i);
-			JSONArray messagesInChannel = new JSONArray(FileUtil.getFileData(messageJsonFile));
-			for (Object messageObj : messagesInChannel.toList()) {
-				if (!(messageObj instanceof JSONObject message)) {
-					continue;
-				}
-				String messageId = JsonUtil.getJsonField(message, "message", new JSONObject())
-						.optString("id", "Unknown");
-				if (messageId.equals(currentId)) {
-					obtained.put(message);
-					break;
-				}
+			String messagePath = PathUtil.fromGuildBlobCache(guild.getId(),
+					Constants.System.GUILD_BLOB_CACHE_CHANNELS_FOLDER_NAME,
+					channel.getId(),
+					Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME,
+					currentId
+			);
+
+			if (Paths.get(messagePath).toFile().exists()) {
+				File messageJsonFile = FileUtil.ensureFileExists(
+						PathUtil.fromGuildBlobCache(guild.getId(),
+								Constants.System.GUILD_BLOB_CACHE_CHANNELS_FOLDER_NAME,
+								channel.getId(),
+								Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME,
+								currentId,
+								"message.json"
+						),
+						"{}"
+				);
+				obtained.put(new JSONObject(FileUtil.getFileData(messageJsonFile)));
 			}
 		}
 
@@ -153,6 +153,7 @@ public class ObtainDeletedMessagesCommandListener extends LogObtainerCommandList
 			}
 			attachmentsDisplay.append("\"").append(a).append("\"");
 			int idx = attachments.toList().indexOf(a);
+			// Make sure there is a comma after every attachment except the last one
 			if (idx != attachments.length() - 1) {
 				attachmentsDisplay.append(",");
 			}

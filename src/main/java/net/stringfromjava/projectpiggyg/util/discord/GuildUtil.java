@@ -25,12 +25,17 @@ import java.util.List;
  */
 public final class GuildUtil {
 
+	public static void createNewGuildFolder(Guild guild) {
+		createNewGuildFolder(guild, true);
+	}
+
 	/**
 	 * Creates a brand-new folder with many files and folders inside for a new guild.
 	 *
 	 * @param guild The new guild as a {@link net.dv8tion.jda.api.entities.Guild} object.
+	 * @param cacheMessages Whether to cache all messages in the guild upon creation.
 	 */
-	public static void createNewGuildFolder(Guild guild) {
+	public static void createNewGuildFolder(Guild guild, boolean cacheMessages) {
 		// Paths
 		String guildId = guild.getId();
 		String newGuildPath = PathUtil.fromGuildFolder(guildId);
@@ -58,7 +63,9 @@ public final class GuildUtil {
 		FileUtil.writeToFile(voiceActionLogsFile, "[]");
 		FileUtil.writeToFile(deletedMessageLogsFile, "[]");
 
-		cacheGuildMessages(guild);
+		if (cacheMessages) {
+			cacheGuildMessages(guild);
+		}
 	}
 
 	/**
@@ -125,7 +132,7 @@ public final class GuildUtil {
 			// Loop through the message history of the current channel
 			for (Message message : GuildUtil.getFullMessageHistory(messageChannel)) {
 				String messagePath = PathUtil.ensurePathExists(
-						PathUtil.constructPath(channelPath, "messages", message.getId()),
+						PathUtil.constructPath(channelPath, Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME, message.getId()),
 						false
 				);
 				// Create the .json file for the basic data of the message

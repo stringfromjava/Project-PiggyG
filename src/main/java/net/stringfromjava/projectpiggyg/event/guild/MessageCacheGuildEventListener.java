@@ -12,7 +12,6 @@ import net.stringfromjava.projectpiggyg.util.app.AppUtil;
 import net.stringfromjava.projectpiggyg.util.data.JsonUtil;
 import net.stringfromjava.projectpiggyg.util.data.FileUtil;
 import net.stringfromjava.projectpiggyg.util.data.PathUtil;
-import net.stringfromjava.projectpiggyg.util.discord.GuildUtil;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 
@@ -33,36 +32,19 @@ public class MessageCacheGuildEventListener extends ListenerAdapter {
 		Guild guild = event.getGuild();
 		Channel channel = event.getChannel();
 
-		String blobCachePath = PathUtil.fromGuildBlobCache(guild.getId());
-		if (!PathUtil.doesPathExist(blobCachePath)) {
-			PathUtil.createPath(blobCachePath);
-			GuildUtil.cacheGuildMessages(guild);
-		}
+		String msgPath = PathUtil.ensurePathExists(PathUtil.fromGuildBlobCache(
+				guild.getId(),
+				Constants.System.GUILD_BLOB_CACHE_CHANNELS_FOLDER_NAME,
+				channel.getId(),
+				Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME,
+				message.getId()
+		), false, false);
 
-		File logsFile = FileUtil.ensureFileExists(
-				PathUtil.fromGuildBlobCache(
-						guild.getId(),
-						Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME,
-						STR."\{channel.getId()}.json"
-				),
-				"[]"
-		);
-		JSONArray messages = new JSONArray(FileUtil.getFileData(logsFile));
+		File msgJsonFile = FileUtil.createFile("message.json", msgPath, false);
+		FileUtil.writeToFile(msgJsonFile, JsonUtil.createMessageJson(message).toString(2));
 
-		messages.put(JsonUtil.createMessageJson(message));
-		FileUtil.writeToFile(logsFile, messages.toString(2));
-
-		// Store all the attachments that are contained in the message
 		for (Message.Attachment attachment : message.getAttachments()) {
-			String path = PathUtil.createPath(
-					PathUtil.fromGuildBlobCache(
-							guild.getId(),
-							Constants.System.GUILD_BLOB_CACHE_MESSAGES_FOLDER_NAME,
-							Constants.System.GUILD_BLOB_CACHE_MESSAGES_ATTACHMENT_FOLDER_NAME,
-							message.getId()
-					)
-			);
-			FileUtil.convertAttachmentToFile(attachment, path, false);
+			FileUtil.convertAttachmentToFile(attachment, msgPath, false);
 		}
 	}
 

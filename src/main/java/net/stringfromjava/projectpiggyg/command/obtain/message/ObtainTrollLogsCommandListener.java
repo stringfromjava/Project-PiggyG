@@ -1,4 +1,4 @@
-package net.stringfromjava.projectpiggyg.command.obtain;
+package net.stringfromjava.projectpiggyg.command.obtain.message;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -12,6 +12,8 @@ import net.stringfromjava.projectpiggyg.command.ILogObtainer;
 import net.stringfromjava.projectpiggyg.command.LogObtainerCommandListener;
 import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.data.command.CommandOptionData;
+import net.stringfromjava.projectpiggyg.util.app.LogType;
+import net.stringfromjava.projectpiggyg.util.app.LoggerUtil;
 import net.stringfromjava.projectpiggyg.util.data.JsonUtil;
 import net.stringfromjava.projectpiggyg.util.data.FileUtil;
 import net.stringfromjava.projectpiggyg.util.data.PathUtil;
@@ -62,27 +64,42 @@ public class ObtainTrollLogsCommandListener extends LogObtainerCommandListener i
 		JSONArray trollLogs = new JSONArray(FileUtil.getFileData(trollLogsFile));
 
 		if (trollLogs.isEmpty()) {
-			event.reply("Hmm, seems like no one has sent any trolls yet...").queue();
+			CommandUtil.sendSafeReply("Hmm, seems like no one has sent any trolls yet...", event);
 			return;
 		}
 
 		if (fromUser != null && fromUser.isBot()) {
-			event.reply("Bro...\n***STOP FUCKING USING COMMANDS ON BOTS, YOU CAN'T MESS WITH MY HOME BOYS LIKE THAT*** :rage:").queue();
+			CommandUtil.sendSafeReply(
+					"Bro...\n***STOP FUCKING USING COMMANDS ON BOTS, YOU CAN'T MESS WITH MY HOME BOYS LIKE THAT*** :rage:",
+					event
+			);
 			return;
 		}
 
 		// Filter the logs if a user was provided
 		JSONArray filteredLogs = new JSONArray();
-		for (Object log : trollLogs) {
-			if (!(log instanceof JSONObject)) {
+		for (Object id : trollLogs) {
+			if (!(id instanceof String l)) {
+				LoggerUtil.log(
+						STR."Found a corrupted troll log ID inside the troll logs file for guild ID \{guild.getId()}. Skipping...",
+						LogType.WARN
+				);
 				continue;
 			}
-			JSONObject l = (JSONObject) log;
-			String senderId = JsonUtil.getJsonField(l, "sender-id", "");
-			// Only add the log if the wanted user's ID
-			// equals the sender's ID in the log
+			File trollFile = FileUtil.ensureFileExists(
+					PathUtil.fromGuildBlobCache(guild.getId(),
+							Constants.System.GUILD_BLOB_CACHE_TROLLS_FOLDER_NAME,
+							l,
+							Constants.System.GUILD_BLOB_CACHE_TROLL_INFO_FILE_NAME
+					),
+					"{}"
+			);
+			JSONObject logInfo = new JSONObject(FileUtil.getFileData(trollFile));
+			JSONObject author = JsonUtil.getJsonField(logInfo, "author", new JSONObject());
+			String senderId = JsonUtil.getJsonField(author, "id", "Unknown");
+
 			if (fromUser == null || senderId.equals(fromUser.getId())) {
-				filteredLogs.put(l);
+				filteredLogs.put(logInfo);
 			}
 		}
 
@@ -108,6 +125,7 @@ public class ObtainTrollLogsCommandListener extends LogObtainerCommandListener i
 		JSONObject attachment = JsonUtil.getJsonField(info, "attachment", new JSONObject());
 
 		// Get all necessary attributes of the log
+		String trollId = JsonUtil.getJsonField(info, "id", "Unknown");
 		String authorUsername = JsonUtil.getJsonField(author, "name", "Unknown");
 		String authorId = JsonUtil.getJsonField(author, "id", "Unknown");
 		String receiverUsername = JsonUtil.getJsonField(receiver, "name", "Unknown");
@@ -125,6 +143,7 @@ public class ObtainTrollLogsCommandListener extends LogObtainerCommandListener i
 
 		// Combine all info
 		sb.append("-------------------------------------------------------------\n");
+		sb.append(STR."[TROLL ID] \{trollId}\n");
 		sb.append(STR."[AUTHOR] \{authorUsername} (ID = \{authorId})\n");
 		sb.append(STR."[RECEIVER] \{receiverUsername} (ID = \{receiverId})\n");
 		sb.append(STR."[MESSAGE SENT] \{message}\n");

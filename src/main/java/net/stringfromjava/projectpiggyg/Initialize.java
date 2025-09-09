@@ -11,7 +11,10 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.stringfromjava.projectpiggyg.command.misc.HelpCommandListener;
-import net.stringfromjava.projectpiggyg.command.obtain.*;
+import net.stringfromjava.projectpiggyg.command.obtain.message.ObtainDeletedMessagesCommandListener;
+import net.stringfromjava.projectpiggyg.command.obtain.message.ObtainTrollLogsCommandListener;
+import net.stringfromjava.projectpiggyg.command.obtain.voice.ObtainVoiceChannelActionLogsCommandListener;
+import net.stringfromjava.projectpiggyg.command.obtain.voice.ObtainVoiceChannelLogs;
 import net.stringfromjava.projectpiggyg.command.stupid.TrollCommandListener;
 import net.stringfromjava.projectpiggyg.util.Constants;
 import net.stringfromjava.projectpiggyg.event.guild.JoinLeaveGuildEventListener;
@@ -221,7 +224,7 @@ public final class Initialize {
 						LogType.WARN,
 						false
 				);
-				GuildUtil.createNewGuildFolder(guild);
+				GuildUtil.createNewGuildFolder(guild, false);
 				displaySeparator(true);
 				missingGuildFoldersFound++;
 			}
@@ -286,10 +289,6 @@ public final class Initialize {
 				CommandUtil.createCommandData(
 						client,
 						new ObtainTrollLogsCommandListener("obtaintrolllogs")
-				),
-				CommandUtil.createCommandData(
-						client,
-						new ObtainTrollAttachmentCommandListener("obtaintrollattachment")
 				),
 				CommandUtil.createCommandData(
 						client,

@@ -30,8 +30,7 @@ public final class PathUtil {
 	 * Creates a directory at the specified path if it does not already exist.
 	 *
 	 * @param path    The path of the directory to create.
-	 * @param logInfo Should the new log when creating the directory
-	 *                be written to the current log file?
+	 * @param logInfo Should it be logged when a new directory is created or if an error occurs?
 	 * @throws RuntimeException If an I/O error occurs while creating the directory.
 	 */
 	@NotNull
@@ -200,7 +199,18 @@ public final class PathUtil {
 	 * @return The path checked (if it needs to be used).
 	 */
 	public static String ensurePathExists(String path) {
-		return ensurePathExists(path, true);
+		return ensurePathExists(path, true, true);
+	}
+
+	/**
+	 * Ensures a directory exists; if it doesn't, then
+	 * it automatically creates it.
+	 *
+	 * @param path The path to ensure existence of.
+	 * @return The path checked (if it needs to be used).
+	 */
+	public static String ensurePathExists(String path, boolean logNonExistentWarning) {
+		return ensurePathExists(path, logNonExistentWarning, true);
 	}
 
 	/**
@@ -209,9 +219,10 @@ public final class PathUtil {
 	 *
 	 * @param path                  The path to ensure existence of.
 	 * @param logNonExistentWarning Should PiggyG log a warning when the path doesn't exist?
+	 * @param logCreated            Should PiggyG log when it creates the path?
 	 * @return The path checked (if it needs to be used).
 	 */
-	public static String ensurePathExists(String path, boolean logNonExistentWarning) {
+	public static String ensurePathExists(String path, boolean logNonExistentWarning, boolean logCreated) {
 		if (!doesPathExist(path)) {
 			if (logNonExistentWarning) {
 				LoggerUtil.log(
@@ -220,7 +231,7 @@ public final class PathUtil {
 						false
 				);
 			}
-			createPath(path);
+			createPath(path, logCreated);
 		}
 		return path;
 	}

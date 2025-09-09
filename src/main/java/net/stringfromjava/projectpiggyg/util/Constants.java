@@ -110,6 +110,17 @@ public final class Constants {
 
 		/**
 		 * The name of the folder that contains all the
+		 * logged troll messages that were sent.
+		 */
+		public static final String GUILD_BLOB_CACHE_TROLLS_FOLDER_NAME = "trolls";
+
+		/**
+		 * The file name for a troll message that was sent.
+		 */
+		public static final String GUILD_BLOB_CACHE_TROLL_INFO_FILE_NAME = "troll.json";
+
+		/**
+		 * The name of the folder that contains all the
 		 * cached message attachments inside each guild.
 		 */
 		public static final String GUILD_BLOB_CACHE_MESSAGES_ATTACHMENT_FOLDER_NAME = "attachments";

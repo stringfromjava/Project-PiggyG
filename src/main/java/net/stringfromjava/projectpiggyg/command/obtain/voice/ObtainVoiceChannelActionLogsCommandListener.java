@@ -1,4 +1,4 @@
-package net.stringfromjava.projectpiggyg.command.obtain;
+package net.stringfromjava.projectpiggyg.command.obtain.voice;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
